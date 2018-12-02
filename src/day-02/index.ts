@@ -16,12 +16,10 @@ export function checksum(input: string) {
 export function findTheBox(input: string) {
   const idSet = new Set()
 
-  for (const line of parseLines(input)) {
-    for (const permutation of getCharcterPermutations(line).values()) {
-      if (idSet.has(permutation)) return permutation.replace('_', '')
+  for (const permutation of getLinePermutations(input)) {
+    if (idSet.has(permutation)) return permutation.replace('_', '')
 
-      idSet.add(permutation)
-    }
+    idSet.add(permutation)
   }
 
   throw new Error('Could not find the box')
@@ -35,6 +33,14 @@ export function letterCounts(input: string) {
       .deleteValue(1)
       .values()
   )
+}
+
+function* getLinePermutations(input: string) {
+  for (const line of parseLines(input)) {
+    for (const permutation of getCharcterPermutations(line).values()) {
+      yield permutation
+    }
+  }
 }
 
 export function getCharcterPermutations(input: string) {
