@@ -5,10 +5,15 @@ test('it cycles an array', () => {
 
   expect(take(5, generator)).toEqual([1, 2, 3, 1, 2])
 })
+
 test('it cycles an array', () => {
   const generator = cycle([1, 2, 3])
 
   expect(take(1, generator)).toEqual([1])
+})
+
+test('given an empty array it throws an error', () => {
+  expect(() => cycle([]).next()).toThrowError()
 })
 
 const take = <T>(n: number, gen: IterableIterator<T>) => {
