@@ -1,4 +1,4 @@
-import { checksum, letterCounts } from '..'
+import { checksum, findTheBox, getCharcterPermutations, letterCounts } from '..'
 import { getInput } from '../../utils/tests'
 
 describe('#letterCounts', () => {
@@ -17,7 +17,7 @@ describe('#letterCounts', () => {
   })
 })
 
-describe('#checksum', () => {
+describe('part 1 - #checksum', () => {
   test.each`
     file                   | expected
     ${'part-1-case-1.txt'} | ${12}
@@ -27,4 +27,28 @@ describe('#checksum', () => {
 
     expect(checksum(input)).toEqual(expected)
   })
+})
+
+describe('part 2 - #findTheBox', () => {
+  test.each`
+    file                   | expected
+    ${'part-2-case-1.txt'} | ${'fgij'}
+    ${'input.txt'}         | ${'pbykrmjmizwhxlqnasfgtycdv'}
+  `('it calculates the letterCounts for $file', async ({ file, expected }) => {
+    const input = await getInput(__dirname, file)
+
+    expect(findTheBox(input)).toEqual(expected)
+  })
+})
+
+describe('getCharcterPermutations', () => {
+  test.each`
+    input      | expected
+    ${'abcde'} | ${new Set(['_bcde', 'a_cde', 'ab_de', 'abc_e', 'abcd_'])}
+  `(
+    'it calculates the permutations for replacing each letter of$input',
+    ({ input, expected }) => {
+      expect(getCharcterPermutations(input)).toEqual(expected)
+    }
+  )
 })
