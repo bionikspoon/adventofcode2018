@@ -1,12 +1,10 @@
-import fs from 'fs'
-import path from 'path'
-import { promisify } from 'util'
 import {
   BinaryTree,
   chronalCalibrationRepeat,
   chronalCalibrationSum,
   cycle,
 } from '..'
+import { getInput } from '../../utils/tests'
 
 describe('#chronalCalibrationSum', () => {
   test.each`
@@ -16,7 +14,7 @@ describe('#chronalCalibrationSum', () => {
     ${'part-1-case-3.txt'} | ${-6}
     ${'input.txt'}         | ${585}
   `('case $file is reduced to $expected', async ({ expected, file }) => {
-    const input = await getInput(file)
+    const input = await getInput(__dirname, file)
 
     expect(chronalCalibrationSum(input.toString())).toEqual(expected)
   })
@@ -31,7 +29,7 @@ describe('#chronalCalibrationSum', () => {
     ${'part-2-case-4.txt'} | ${14}
     ${'input.txt'}         | ${83173}
   `('case $file is reduced to $expected', async ({ expected, file }) => {
-    const input = await getInput(file)
+    const input = await getInput(__dirname, file)
 
     expect(chronalCalibrationRepeat(input)).toEqual(expected)
   })
@@ -88,13 +86,6 @@ describe('#BinaryTree', () => {
     }).toThrowError('BinaryTree.value already exists: 6')
   })
 })
-
-const readFileAsync = promisify(fs.readFile)
-
-const getInput = (file: string) =>
-  readFileAsync(path.join(__dirname, 'case', file)).then(buffer =>
-    buffer.toString()
-  )
 
 const take = <T>(n: number, gen: IterableIterator<T>) => {
   const results = []
