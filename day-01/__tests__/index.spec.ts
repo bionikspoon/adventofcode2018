@@ -24,7 +24,7 @@ test.each`
 
 test.each`
   file                   | expected
-  ${'part-2-case-1.txt'} | ${0}
+  ${'part-2-case-1.txt'} | ${1}
   ${'part-2-case-2.txt'} | ${10}
   ${'part-2-case-3.txt'} | ${5}
   ${'part-2-case-4.txt'} | ${14}
