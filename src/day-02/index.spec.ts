@@ -1,10 +1,5 @@
-import {
-  checksum,
-  findTheBox,
-  getCharacterPermutations,
-  letterCounts,
-} from '..'
-import { getInput } from '../../utils/tests'
+import { checksum, findTheBox, getCharacterPermutations, letterCounts } from '.'
+import { getInput } from '../utils/tests'
 
 describe('#letterCounts', () => {
   test.each`

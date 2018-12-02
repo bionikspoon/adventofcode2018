@@ -1,4 +1,4 @@
-import cycle from '../cycle'
+import cycle from './cycle'
 
 test('it cycles an array', () => {
   const generator = cycle([1, 2, 3])

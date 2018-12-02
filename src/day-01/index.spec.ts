@@ -1,5 +1,5 @@
-import { chronalCalibrationRepeat, chronalCalibrationSum } from '..'
-import { getInput } from '../../utils/tests'
+import { chronalCalibrationRepeat, chronalCalibrationSum } from '.'
+import { getInput } from '../utils/tests'
 
 describe('part 1  - #chronalCalibrationSum', () => {
   test.each`

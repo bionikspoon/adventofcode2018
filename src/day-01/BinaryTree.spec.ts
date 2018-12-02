@@ -1,4 +1,4 @@
-import BinaryTree from '../BinaryTree'
+import BinaryTree from './BinaryTree'
 
 test('it has an initial value', () => {
   const tree = new BinaryTree(0)
