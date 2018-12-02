@@ -1,5 +1,5 @@
-import { checksum, findTheBox, getCharcterPermutations, letterCounts } from '..'
-import { getInput } from '../../utils/tests'
+import { checksum, findTheBox, getCharacterPermutations, letterCounts } from '.'
+import { getInput } from '../utils/tests'
 
 describe('#letterCounts', () => {
   test.each`
@@ -41,14 +41,14 @@ describe('part 2 - #findTheBox', () => {
   })
 })
 
-describe('getCharcterPermutations', () => {
+describe('getCharacterPermutations', () => {
   test.each`
     input      | expected
     ${'abcde'} | ${new Set(['_bcde', 'a_cde', 'ab_de', 'abc_e', 'abcd_'])}
   `(
     'it calculates the permutations for replacing each letter of$input',
     ({ input, expected }) => {
-      expect(getCharcterPermutations(input)).toEqual(expected)
+      expect(getCharacterPermutations(input)).toEqual(expected)
     }
   )
 })
