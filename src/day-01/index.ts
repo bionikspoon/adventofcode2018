@@ -8,20 +8,13 @@ export function chronalCalibrationSum(input: string) {
 }
 
 export function chronalCalibrationRepeat(input: string, maxSize = 1000000) {
-  const partials = parseInput(input)
-  const partialsGenerator = cycle(partials)
-
   let state = 0
-  let i = 0
   const tree = new BinaryTree(state)
+  const checkMaxSize = iterateMaxSize(maxSize)
+  const partialsGenerator = cycle(parseInput(input))
 
   for (const partial of partialsGenerator) {
-    if (i >= maxSize) {
-      throw new Error(`Potential infinite loop, increase maxSize: ${maxSize}`)
-    }
-    if (!partial) {
-      throw new Error(`Partial is undefined in partials: ${partials}`)
-    }
+    if (!partial) continue
 
     state = partial(state)
 
@@ -31,7 +24,7 @@ export function chronalCalibrationRepeat(input: string, maxSize = 1000000) {
       return state
     }
 
-    i++
+    checkMaxSize.next()
   }
 }
 
@@ -71,6 +64,17 @@ export function* cycle<T>(items: T[]) {
   }
 }
 
+function* iterateMaxSize(maxSize: number) {
+  let i = 0
+
+  while (i < maxSize) {
+    yield
+    i++
+  }
+
+  throw new Error(`Potential infinite loop, increase maxSize: ${maxSize}`)
+}
+
 export class BinaryTree<T> {
   public value: T
   private left: BinaryTree<T> | null
@@ -87,27 +91,24 @@ export class BinaryTree<T> {
       throw new Error(`BinaryTree.value already exists: ${value}`)
     }
 
-    if (value < this.value) {
-      if (this.left === null) {
-        this.left = new BinaryTree(value)
-      } else {
-        this.left.insert(value)
-      }
-    }
-
-    if (value > this.value) {
-      if (this.right === null) {
-        this.right = new BinaryTree(value)
-      } else {
-        this.right.insert(value)
-      }
-    }
+    if (value < this.value) this.insertNode('left', value)
+    if (value > this.value) this.insertNode('right', value)
 
     return this
   }
 
   public toArray() {
     return Array.from(this.values())
+  }
+
+  private insertNode(key: 'left' | 'right', value: T) {
+    if (this[key] === null) {
+      this[key] = new BinaryTree(value)
+    } else {
+      this[key]!.insert(value)
+    }
+
+    return this
   }
 
   private *values(): any {
