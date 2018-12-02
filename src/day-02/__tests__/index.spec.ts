@@ -1,4 +1,4 @@
-import { letterCounts, checksum } from '..'
+import { checksum, letterCounts } from '..'
 import { getInput } from '../../utils/tests'
 
 describe('#letterCounts', () => {

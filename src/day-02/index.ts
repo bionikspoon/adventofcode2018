@@ -19,9 +19,7 @@ export function letterCounts(input: string) {
   return new Set(
     input
       .split('')
-      .reduce((counter, letter) => {
-        return counter.add(letter)
-      }, new Counter())
+      .reduce((counter, letter) => counter.add(letter), new Counter())
       .deleteValue(1)
       .values()
   )
@@ -48,6 +46,8 @@ class Counter {
   }
 
   public getValue(key: string | number) {
+    if (!this.counts[key]) return 0
+
     return this.counts[key]
   }
 
