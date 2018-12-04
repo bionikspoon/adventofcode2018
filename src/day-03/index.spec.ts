@@ -1,7 +1,11 @@
-import { findOverlappingClaims, parseClaim } from '.'
+import {
+  findNonOverlappingClaimIds,
+  findOverlappingClaimsCount,
+  parseClaim,
+} from '.'
 import { getInput } from '../utils/tests'
 
-describe('part 1 - #findOverlappingClaims', () => {
+describe('part 1 - #findOverlappingClaimsCount', () => {
   test.each`
     file                   | expected
     ${'part-1-case-1.txt'} | ${4}
@@ -9,7 +13,19 @@ describe('part 1 - #findOverlappingClaims', () => {
   `('it finds the overlapping claims in $file', async ({ file, expected }) => {
     const input = await getInput(__dirname, file)
 
-    expect(findOverlappingClaims(input)).toEqual(expected)
+    expect(findOverlappingClaimsCount(input)).toEqual(expected)
+  })
+})
+
+describe('part 2 - #findNonOverlappingClaimIds', () => {
+  test.each`
+    file                   | expected
+    ${'part-1-case-1.txt'} | ${[3]}
+    ${'input.txt'}         | ${[806]}
+  `('it finds the overlapping claims in $file', async ({ file, expected }) => {
+    const input = await getInput(__dirname, file)
+
+    expect(findNonOverlappingClaimIds(input)).toEqual(expected)
   })
 })
 
