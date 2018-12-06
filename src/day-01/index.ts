@@ -33,6 +33,8 @@ export function chronalCalibrationRepeat(input: string, maxSize = 1000000) {
 
     checkMaxSize.next()
   }
+
+  throw new Error('Something went wrong')
 }
 
 const RE_MATCH_LINE = new RegExp(/^(?<op>\+|-)(?<value>\d+)$/, 'um')

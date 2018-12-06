@@ -29,4 +29,8 @@ export default class Counter {
   public values() {
     return Object.values(this.counts)
   }
+
+  public entries() {
+    return Object.entries(this.counts)
+  }
 }

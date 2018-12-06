@@ -30,6 +30,7 @@
     }
   },
   "dependencies": {
+    "moment": "^2.22.2",
     "ramda": "^0.26.1"
   }
 }
