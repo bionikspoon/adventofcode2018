@@ -163,7 +163,7 @@ function getSleepiestMinutePerGuard(guardRecords: GuardRecord[]) {
 
   const sortedResults = groupedRecords
     .map(findSleepiestMinute)
-    .sort((l, r) => r.minute - l.minute)
+    .sort((l, r) => r.count - l.count)
 
   if (sortedResults.length < 1) throw new Error('Something went wrong')
   return sortedResults
@@ -183,12 +183,14 @@ const findSleepiestMinute = (records: GuardRecord[]) => {
     return {
       id: records[0].id,
       minute: 0,
+      count: 0,
     }
   }
 
   return {
     id: records[0].id,
     minute: parseInt(mostCommonEntries[0][0]),
+    count: mostCommonEntries[0][1],
   }
 }
 

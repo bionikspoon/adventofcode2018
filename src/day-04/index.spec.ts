@@ -25,7 +25,7 @@ describe('part 2 - #findSleepiestGuardMinute', () => {
   test.each`
     file                   | expected
     ${'part-1-case-1.txt'} | ${4455}
-    ${'input.txt'}         | ${156296}
+    ${'input.txt'}         | ${10491}
   `('it finds the overlapping claims in $file', async ({ file, expected }) => {
     const input = await getInput(__dirname, file)
 
