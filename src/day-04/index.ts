@@ -141,7 +141,7 @@ function getSleepiestGuardId(guardRecords: GuardRecord[]) {
       (acc, record) => {
         return {
           id: record.id,
-          minutesSleeping: acc.minutesSleeping + record.sleepTime(),
+          minutesSleeping: acc.minutesSleeping + record.sleepTime,
         }
       },
       { id: 0, minutesSleeping: 0 }
@@ -173,7 +173,7 @@ const findSleepiestMinute = (records: GuardRecord[]) => {
   const counter = new Counter()
 
   records.forEach(record => {
-    for (const minute of record.sleepMinutes()) {
+    for (const minute of record.sleepMinutesList) {
       counter.add(minute.toString())
     }
   })
@@ -197,7 +197,7 @@ function filterById(id: number, records: GuardRecord[]) {
 }
 
 function getSleepiestMinute(records: GuardRecord[]) {
-  const sleepMinutesGroup = records.map(record => record.sleepMinutes())
+  const sleepMinutesGroup = records.map(record => record.sleepMinutesList)
   const counter = new Counter()
   sleepMinutesGroup.forEach(
     minutes => void minutes.forEach(minute => void counter.add(minute))
@@ -212,6 +212,7 @@ class GuardRecord {
   public id: number
   private date: moment.Moment
   private minutes: RecordMinutes
+  private _sleepMinutesList: number[] | null = null
 
   constructor([header, ...entries]: EntryType[]) {
     if (!isNewShiftEntry(header)) {
@@ -231,12 +232,18 @@ class GuardRecord {
     return `${date}  #${id}  ${minutes}`
   }
 
-  public sleepMinutes() {
-    return this.minutes.valuesWhere(([_, minute]) => minute === true)
+  public get sleepMinutesList() {
+    if (this._sleepMinutesList === null) {
+      this._sleepMinutesList = this.minutes.valuesWhere(
+        ([_, minute]) => minute === true
+      )
+    }
+
+    return this._sleepMinutesList
   }
 
-  public sleepTime() {
-    return this.sleepMinutes().length
+  public get sleepTime() {
+    return this.sleepMinutesList.length
   }
 }
 
