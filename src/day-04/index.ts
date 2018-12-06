@@ -58,7 +58,7 @@ const RE_PARSE_LINE = /\[(?<date>.*)\]\s(?:Guard\s#(?<id>\d+)\s)?(?<note>.*)/gmu
 // UTILS
 
 export function toDate(date: string) {
-  return moment(date, 'YYYY-MM-DD HH:mm', true)
+  return moment(date, 'YYYY-MM-DD HH:mm', true).startOf('minute')
 }
 
 function roundToHour(date: moment.Moment) {
