@@ -1,7 +1,4 @@
-import moment from 'moment'
-import util from 'util'
 import {
-  EntryType,
   findSleepingGuard,
   sortParsedRecords,
   toDate,
@@ -10,10 +7,6 @@ import {
 } from '.'
 import parseLines from '../utils/parseLines'
 import { getInput } from '../utils/tests'
-
-moment.prototype[util.inspect.custom] = function inspect() {
-  return this.inspect()
-}
 
 describe('part 1 - #findSleepingGuard', () => {
   test.each`
@@ -43,23 +36,29 @@ describe('#toParsedEntry', () => {
 })
 
 describe('#toGuardRecord', () => {
-  let parsedEntries: EntryType[]
+  describe.each`
+    file
+    ${'part-1-case-1.txt'}
+    ${'input.txt'}
+  `('given $file', ({ file }) => {
+    let subject: string[]
 
-  describe('given part-1-case-1.txt', () => {
     beforeEach(async () => {
-      const input = await getInput(__dirname, 'part-1-case-1.txt')
-      parsedEntries = sortParsedRecords(parseLines(input))
+      const input = await getInput(__dirname, file)
+      const parsedEntries = sortParsedRecords(parseLines(input))
+
+      subject = toGuardRecords(parsedEntries).map((entry: any) =>
+        entry.toString()
+      )
     })
 
     test('it matches snapshot', () => {
-      expect(parsedEntries).toMatchSnapshot()
+      expect(subject).toMatchSnapshot()
     })
 
-    test('it converts entries to records', () => {
-      const subject = toGuardRecords(parsedEntries).map((entry: any) =>
-        entry.toString()
-      )
+    if (file !== 'part-1-case-1.txt') return
 
+    test('it converts entries to records', () => {
       const expected = [
         '11-01  #0010  .....####################.....#########################.....',
         '11-02  #0099  ........................................##########..........',
@@ -69,17 +68,6 @@ describe('#toGuardRecord', () => {
       ]
 
       expect(subject).toEqual(expected)
-    })
-  })
-  describe('given input.txt', () => {
-    beforeEach(async () => {
-      const input = await getInput(__dirname, 'input.txt')
-
-      parsedEntries = sortParsedRecords(parseLines(input))
-    })
-
-    test('it matches snapshot', () => {
-      expect(parsedEntries).toMatchSnapshot()
     })
   })
 })
