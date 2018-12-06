@@ -26,6 +26,12 @@ export default class Counter {
     return this.counts[key]
   }
 
+  public mostCommon() {
+    return this.entries().sort(
+      ([lKey, lCount], [rKey, rCount]) => rCount - lCount
+    )
+  }
+
   public values() {
     return Object.values(this.counts)
   }

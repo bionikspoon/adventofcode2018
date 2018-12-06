@@ -1,4 +1,5 @@
 import {
+  findSleepiestGuardMinute,
   findSleepingGuard,
   sortParsedRecords,
   toDate,
@@ -17,6 +18,18 @@ describe('part 1 - #findSleepingGuard', () => {
     const input = await getInput(__dirname, file)
 
     expect(findSleepingGuard(input)).toEqual(expected)
+  })
+})
+
+describe('part 2 - #findSleepiestGuardMinute', () => {
+  test.each`
+    file                   | expected
+    ${'part-1-case-1.txt'} | ${4455}
+    ${'input.txt'}         | ${156296}
+  `('it finds the overlapping claims in $file', async ({ file, expected }) => {
+    const input = await getInput(__dirname, file)
+
+    expect(findSleepiestGuardMinute(input)).toEqual(expected)
   })
 })
 

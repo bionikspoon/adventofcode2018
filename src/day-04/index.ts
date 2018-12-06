@@ -17,6 +17,17 @@ export function findSleepingGuard(input: string) {
   return sleepiestMinute * sleepiestGuardId
 }
 
+// PART 2
+
+export function findSleepiestGuardMinute(input: string) {
+  const parsedLines = parseLines(input)
+  const recordsSortedByDate = sortParsedRecords(parsedLines)
+  const guardRecords = toGuardRecords(recordsSortedByDate)
+  const { id, minute } = getSleepiestMinutePerGuard(guardRecords)[0]
+
+  return id * minute
+}
+
 // TYPES
 interface IBaseEntry {
   id?: number
@@ -144,6 +155,43 @@ function getSleepiestGuardId(guardRecords: GuardRecord[]) {
   return sortedSleepiness[0].id
 }
 
+function getSleepiestMinutePerGuard(guardRecords: GuardRecord[]) {
+  const filteredRecords = guardRecords
+  const groupedRecords = Object.values(
+    groupBy(record => record.id.toString(), filteredRecords)
+  )
+
+  const sortedResults = groupedRecords
+    .map(findSleepiestMinute)
+    .sort((l, r) => r.minute - l.minute)
+
+  if (sortedResults.length < 1) throw new Error('Something went wrong')
+  return sortedResults
+}
+
+const findSleepiestMinute = (records: GuardRecord[]) => {
+  const counter = new Counter()
+
+  records.forEach(record => {
+    for (const minute of record.sleepMinutes()) {
+      counter.add(minute.toString())
+    }
+  })
+  const mostCommonEntries = counter.mostCommon()
+
+  if (mostCommonEntries.length <= 0) {
+    return {
+      id: records[0].id,
+      minute: 0,
+    }
+  }
+
+  return {
+    id: records[0].id,
+    minute: parseInt(mostCommonEntries[0][0]),
+  }
+}
+
 function filterById(id: number, records: GuardRecord[]) {
   return records.filter(record => id === record.id)
 }
@@ -154,13 +202,8 @@ function getSleepiestMinute(records: GuardRecord[]) {
   sleepMinutesGroup.forEach(
     minutes => void minutes.forEach(minute => void counter.add(minute))
   )
-  const counts = counter
-    .entries()
-    .sort(([lKey, lCount], [rKey, rCount]) => rCount - lCount)
 
-  if (counts.length < 1) throw new Error('Something went wrong')
-
-  return parseInt(counts[0][0])
+  return parseInt(counter.mostCommon()[0][0])
 }
 
 // CLASSES
