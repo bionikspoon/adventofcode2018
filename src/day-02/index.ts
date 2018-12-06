@@ -1,6 +1,6 @@
 import R from 'ramda'
+import Counter from '../utils/Counter'
 import parseLines from '../utils/parseLines'
-import Counter from './Counter'
 
 // PART 1
 export function checksum(input: string) {
