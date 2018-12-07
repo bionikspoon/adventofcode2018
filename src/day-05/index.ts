@@ -1,30 +1,26 @@
 import { LinkedList, Node } from './LinkedList'
 
 export function reducePolymers(input: string) {
-  const list = LinkedList.from(
-    input
-      .trim()
-      .split('')
-      .map(char => new Node(char))
-  )
+  const list = createList(input)
 
   let node = list.firstNode
 
   while (true) {
     if (node === null || node.next === null) break
 
-    if (hasReaction(node.value, node.next.value)) {
-      if (node === list.firstNode) {
-        list.remove(list.firstNode!)
-        list.remove(list.firstNode!)
-        node = list.firstNode
-      } else {
-        node = node.prev
-        list.remove(node!.next!)
-        list.remove(node!.next!)
-      }
-    } else {
+    if (!hasReaction(node.value, node.next.value)) {
       node = node.next
+      continue
+    }
+
+    if (node === list.firstNode) {
+      list.remove(list.firstNode!)
+      list.remove(list.firstNode!)
+      node = list.firstNode
+    } else {
+      node = node.prev
+      list.remove(node!.next!)
+      list.remove(node!.next!)
     }
   }
 
@@ -45,4 +41,13 @@ function isLowerCase(text: string) {
 
 function isUpperCase(text: string) {
   return text.toUpperCase() === text
+}
+
+function createList(input: string) {
+  const nodes = input
+    .trim()
+    .split('')
+    .map(char => new Node(char))
+
+  return LinkedList.from(nodes)
 }
