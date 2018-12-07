@@ -17,6 +17,17 @@ export function findSleepingGuard(input: string) {
   return sleepiestMinute * sleepiestGuardId
 }
 
+// PART 2
+
+export function findSleepiestGuardMinute(input: string) {
+  const parsedLines = parseLines(input)
+  const recordsSortedByDate = sortParsedRecords(parsedLines)
+  const guardRecords = toGuardRecords(recordsSortedByDate)
+  const { id, minute } = getSleepiestMinutePerGuard(guardRecords)[0]
+
+  return id * minute
+}
+
 // TYPES
 interface IBaseEntry {
   id?: number
@@ -130,7 +141,7 @@ function getSleepiestGuardId(guardRecords: GuardRecord[]) {
       (acc, record) => {
         return {
           id: record.id,
-          minutesSleeping: acc.minutesSleeping + record.sleepTime(),
+          minutesSleeping: acc.minutesSleeping + record.sleepTime,
         }
       },
       { id: 0, minutesSleeping: 0 }
@@ -144,23 +155,57 @@ function getSleepiestGuardId(guardRecords: GuardRecord[]) {
   return sortedSleepiness[0].id
 }
 
+function getSleepiestMinutePerGuard(guardRecords: GuardRecord[]) {
+  const filteredRecords = guardRecords
+  const groupedRecords = Object.values(
+    groupBy(record => record.id.toString(), filteredRecords)
+  )
+
+  const sortedResults = groupedRecords
+    .map(findSleepiestMinute)
+    .sort((l, r) => r.count - l.count)
+
+  if (sortedResults.length < 1) throw new Error('Something went wrong')
+  return sortedResults
+}
+
+const findSleepiestMinute = (records: GuardRecord[]) => {
+  const counter = new Counter()
+
+  records.forEach(record => {
+    for (const minute of record.sleepMinutesList) {
+      counter.add(minute.toString())
+    }
+  })
+  const mostCommonEntries = counter.mostCommon()
+
+  if (mostCommonEntries.length <= 0) {
+    return {
+      id: records[0].id,
+      minute: 0,
+      count: 0,
+    }
+  }
+
+  return {
+    id: records[0].id,
+    minute: parseInt(mostCommonEntries[0][0]),
+    count: mostCommonEntries[0][1],
+  }
+}
+
 function filterById(id: number, records: GuardRecord[]) {
   return records.filter(record => id === record.id)
 }
 
 function getSleepiestMinute(records: GuardRecord[]) {
-  const sleepMinutesGroup = records.map(record => record.sleepMinutes())
+  const sleepMinutesGroup = records.map(record => record.sleepMinutesList)
   const counter = new Counter()
   sleepMinutesGroup.forEach(
     minutes => void minutes.forEach(minute => void counter.add(minute))
   )
-  const counts = counter
-    .entries()
-    .sort(([lKey, lCount], [rKey, rCount]) => rCount - lCount)
 
-  if (counts.length < 1) throw new Error('Something went wrong')
-
-  return parseInt(counts[0][0])
+  return parseInt(counter.mostCommon()[0][0])
 }
 
 // CLASSES
@@ -169,6 +214,7 @@ class GuardRecord {
   public id: number
   private date: moment.Moment
   private minutes: RecordMinutes
+  private _sleepMinutesList: number[] | null = null
 
   constructor([header, ...entries]: EntryType[]) {
     if (!isNewShiftEntry(header)) {
@@ -188,12 +234,18 @@ class GuardRecord {
     return `${date}  #${id}  ${minutes}`
   }
 
-  public sleepMinutes() {
-    return this.minutes.valuesWhere(([_, minute]) => minute === true)
+  public get sleepMinutesList() {
+    if (this._sleepMinutesList === null) {
+      this._sleepMinutesList = this.minutes.valuesWhere(
+        ([_, minute]) => minute === true
+      )
+    }
+
+    return this._sleepMinutesList
   }
 
-  public sleepTime() {
-    return this.sleepMinutes().length
+  public get sleepTime() {
+    return this.sleepMinutesList.length
   }
 }
 
