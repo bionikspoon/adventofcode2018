@@ -1,4 +1,4 @@
-import { reducePolymers } from '.'
+import { hasReaction, reducePolymers } from '.'
 import { getInput } from '../utils/tests'
 
 describe('part 1', () => {
@@ -19,6 +19,20 @@ describe('part 1', () => {
 
     test("it's counts match up", () => {
       expect(reducePolymers(input)).toHaveLength(count)
+    })
+  })
+
+  describe('#hasReaction', () => {
+    test.each`
+      l      | r      | expected
+      ${'a'} | ${'a'} | ${false}
+      ${'a'} | ${'C'} | ${false}
+      ${'C'} | ${'a'} | ${false}
+      ${'C'} | ${'C'} | ${false}
+      ${'c'} | ${'C'} | ${true}
+      ${'C'} | ${'c'} | ${true}
+    `('given $l, $r it is $expected', ({ l, r, expected }) => {
+      expect(hasReaction(l, r)).toEqual(expected)
     })
   })
 })

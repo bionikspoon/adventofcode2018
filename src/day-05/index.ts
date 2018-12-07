@@ -11,9 +11,9 @@ export function reducePolymers(input: string) {
   let node = list.firstNode
 
   while (true) {
-    if (node === null) break
+    if (node === null || node.next === null) break
 
-    if (hasReaction(node)) {
+    if (hasReaction(node.value, node.next.value)) {
       if (node === list.firstNode) {
         list.remove(list.firstNode!)
         list.remove(list.firstNode!)
@@ -31,14 +31,10 @@ export function reducePolymers(input: string) {
   return Array.from(list).join('')
 }
 
-function hasReaction(l: Node<string>) {
-  if (l.next === null) return false
-
-  const r = l.next
-
-  if (l.value.toLowerCase() !== r.value.toLowerCase()) return false
-  if (isLowerCase(l.value) && isUpperCase(r.value)) return true
-  if (isUpperCase(l.value) && isLowerCase(r.value)) return true
+export function hasReaction(l: string, r: string) {
+  if (l.toLowerCase() !== r.toLowerCase()) return false
+  if (isLowerCase(l) && isUpperCase(r)) return true
+  if (isUpperCase(l) && isLowerCase(r)) return true
 
   return false
 }
