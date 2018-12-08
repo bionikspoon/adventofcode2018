@@ -1,4 +1,4 @@
-import { Node, LinkedList } from './LinkedList'
+import { LinkedList, Node } from './LinkedList'
 
 describe('Node', () => {
   describe('#join', () => {

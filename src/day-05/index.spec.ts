@@ -1,11 +1,16 @@
-import { hasReaction, reducePolymers } from '.'
+import {
+  crushPolymers,
+  hasReaction,
+  reduceCrushedPolymers,
+  reducePolymers,
+} from '.'
 import { getInput } from '../utils/tests'
 
 describe('part 1', () => {
   describe.each`
-    file                   | count
-    ${'part-1-case-1.txt'} | ${10}
-    ${'index.txt'}         | ${10886}
+    file            | count
+    ${'case-1.txt'} | ${10}
+    ${'index.txt'}  | ${10886}
   `('given $file', async ({ file, count }) => {
     let input: string
 
@@ -34,5 +39,36 @@ describe('part 1', () => {
     `('given $l, $r it is $expected', ({ l, r, expected }) => {
       expect(hasReaction(l, r)).toEqual(expected)
     })
+  })
+})
+
+describe('part 2', () => {
+  describe.each`
+    file            | expected
+    ${'case-1.txt'} | ${4}
+    ${'index.txt'}  | ${4684}
+  `('given $file', async ({ file, expected }) => {
+    let input: string
+
+    beforeEach(async () => {
+      input = await getInput(__dirname, file)
+    })
+
+    test('it finds the shortest polymer', () => {
+      expect(reduceCrushedPolymers(input)).toEqual(expected)
+    })
+  })
+})
+
+describe('#crushPolymers', () => {
+  const polymer = 'dabAcCaCBAcCcaDA'
+  test.each`
+    char   | expected
+    ${'a'} | ${'dbcCCBcCcD'}
+    ${'b'} | ${'daAcCaCAcCcaDA'}
+    ${'c'} | ${'dabAaBAaDA'}
+    ${'d'} | ${'abAcCaCBAcCcaA'}
+  `('it can crush $char of polymer', ({ char, expected }) => {
+    expect(crushPolymers(char, polymer)).toEqual(expected)
   })
 })
