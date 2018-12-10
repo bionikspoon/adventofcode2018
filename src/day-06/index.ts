@@ -16,6 +16,7 @@ interface IPoint {
   x: number
   y: number
 }
+
 export function findLargestFiniteArea(input: string) {
   const points = pipe(
     toLines,
@@ -60,21 +61,21 @@ const toPoints = pipe(
 const countConnections = (points: IPoint[], limit: number) => {
   const { top, left, bottom, right } = findBoundingBox(points)
 
-  return Array.from(iteratePoints({ top, left, right, bottom }))
-    .map(mapPoint =>
+  return arrayOfPoints({ top, left, bottom, right }).filter(
+    mapPoint =>
+      limit >
       points.reduce(
         (acc, point) => acc + findManhattenDistance(point, mapPoint),
         0
       )
-    )
-    .filter(count => count < limit).length
+  ).length
 }
 
 const countClosest = (points: IPoint[]) => {
   const finitePoints = getFinitePoints(points)
   const { top, left, bottom, right } = findBoundingBox(points)
 
-  return Array.from(iteratePoints({ top, left, right, bottom }))
+  return arrayOfPoints({ top, left, bottom, right })
     .map(l => findClosestPoint(l, points))
     .filter(point => point !== null)
     .reduce(
@@ -100,17 +101,16 @@ const findBoundingBox = (points: IPoint[]) =>
     }
   )
 
-function* iteratePoints({
-  top,
-  left,
-  right,
-  bottom,
-}: {
+interface IBoundary {
   top: number
   left: number
   right: number
   bottom: number
-}) {
+}
+const arrayOfPoints = ({ top, left, right, bottom }: IBoundary) =>
+  Array.from(iteratePoints({ top, left, right, bottom }))
+
+function* iteratePoints({ top, left, right, bottom }: IBoundary) {
   for (let x = left; x <= right; x++) {
     for (let y = top; y <= bottom; y++) {
       yield { id: '', x, y }
