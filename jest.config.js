@@ -1,6 +1,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const CI = process.env.CI || process.argv.includes('--ci')
+
 module.exports = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
@@ -56,7 +58,7 @@ module.exports = {
   globals: {
     'ts-jest': {
       tsConfig: 'tsconfig.json',
-      diagnostics: true,
+      diagnostics: CI ? true : { warnOnly: true },
     },
   },
 
