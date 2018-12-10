@@ -47,12 +47,12 @@ export class Step {
   }
 
   public addPrereq(step: Step) {
-    this.prereqs = sortById(uniq(append(step, this.prereqs)))
+    this.prereqs = appendUniq(step, this.prereqs)
     return this
   }
 
   public addFollowedBy(step: Step) {
-    this.followedBy = sortById(uniq(append(step, this.followedBy)))
+    this.followedBy = appendUniq(step, this.followedBy)
     return this
   }
 
@@ -91,3 +91,6 @@ export class Step {
 }
 
 const sortById = sortBy(s => s.id)
+
+const appendUniq: <T>(step: T, steps: T[]) => T[] = (step, steps) =>
+  sortById(uniq(append(step, steps)))
