@@ -7,20 +7,15 @@ export function findInstructionsOrder(input: string) {
 
   const operationsLog: string[] = []
 
-  const queue = new Queue<Step>()
-
   let unblockedSteps = instructions.getUnblockedSteps()
   while (unblockedSteps.length) {
-    reverse(unblockedSteps).forEach(step => queue.add(step))
+    const steps = unblockedSteps.values()
+    const { value: step, done } = steps.next()
+    if (done || !step || !step.isReady()) return
 
-    queue.next(step => {
-      if (!step.isReady()) return
+    step.markCompleted()
+    operationsLog.push(step.id)
 
-      step.markCompleted()
-      operationsLog.push(step.id)
-    })
-
-    queue.clear()
     unblockedSteps = instructions.getUnblockedSteps()
   }
 
@@ -78,25 +73,24 @@ function iterateInstructions(
     onStepCompletion?: (step: Step) => void
   }
 ) {
-  const queue = new Queue<Step>()
   const pool = new Pool(workers)
   let unblockedSteps = instructions.getUnblockedSteps()
   while (unblockedSteps.length || pool.isWorking()) {
-    reverse(unblockedSteps).forEach(step => queue.add(step))
+    const steps = unblockedSteps.values()
     pool.forEach(worker => {
-      queue.next(step => {
-        if (!step || !step.isReady()) return
-        worker.work(step.time, step, () => {
-          step.markCompleted()
-          if (onStepCompletion) onStepCompletion(step)
-        })
-        step.markInProgress()
+      const { value: step, done } = steps.next()
+      if (done || !step || !step.isReady()) return
+
+      worker.work(step.time, step, () => {
+        step.markCompleted()
+        if (onStepCompletion) onStepCompletion(step)
       })
+      step.markInProgress()
     })
+
     pool.tick()
     if (onTick) onTick()
 
-    queue.clear()
     unblockedSteps = instructions.getUnblockedSteps()
   }
 }
@@ -138,23 +132,14 @@ class Pool<T> {
 }
 
 class Worker<T> {
-  public status: 'IDLE' | 'WORKING'
-  private time: number
+  public status: 'IDLE' | 'WORKING' = 'IDLE'
+  private time: number = 0
   private callback: (() => void) | null = null
-  private job: T | null
-
-  constructor() {
-    this.status = 'IDLE'
-    this.time = 0
-    this.callback = null
-    this.job = null
-  }
 
   public work(time: number, job: T, callback: () => void) {
     this.status = 'WORKING'
     this.time = time
     this.callback = callback
-    this.job = job
   }
 
   public tick() {
@@ -174,41 +159,6 @@ class Worker<T> {
     this.status = 'IDLE'
     this.time = 0
     this.callback = null
-    this.job = null
-  }
-}
-
-class Queue<T> {
-  private items: T[] = []
-
-  public add(item: T) {
-    this.items = uniq(prepend(item, this.items))
-
-    return this
-  }
-
-  public unshift() {
-    const [x, ...xs] = this.items
-    this.items = xs
-    return x
-  }
-
-  public clear() {
-    this.items = []
-    return this
-  }
-  public next(fn: (next: T) => void) {
-    const next = this.unshift()
-    if (next) fn(next)
-
-    return this
-  }
-
-  public forEach(fn: (next: T) => void) {
-    while (this.items.length) {
-      fn(this.unshift())
-    }
-    return this
   }
 }
 
