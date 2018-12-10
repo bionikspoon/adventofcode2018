@@ -1,4 +1,8 @@
-import { findInstructionsOrder } from '.'
+import {
+  findInstructionsOrder,
+  findTimedInstructionsOrder,
+  findTimeToCompletion,
+} from '.'
 import { getInput } from '../utils/tests'
 
 describe('part 1', () => {
@@ -6,7 +10,7 @@ describe('part 1', () => {
     file            | expected                        | skip
     ${'case-1.txt'} | ${'CABDFE'}                     | ${false}
     ${'input.txt'}  | ${'OVXCKZBDEHINPFSTJLUYRWGAMQ'} | ${false}
-  `('#findLargestFiniteArea given $file', ({ file, expected, skip }) => {
+  `('given $file', ({ file, expected, skip }) => {
     const TEST = skip ? test.skip : test
     let input: string
 
@@ -14,8 +18,37 @@ describe('part 1', () => {
       input = await getInput(__dirname, file)
     })
 
-    TEST('it finds the largest area that is not infinite', () => {
+    TEST('it finds the order of operations', () => {
       expect(findInstructionsOrder(input)).toEqual(expected)
     })
   })
+})
+describe('part 2', () => {
+  describe.each`
+    file            | workers | baseTime | expectedOrder                   | expectedTime | skip
+    ${'case-1.txt'} | ${2}    | ${0}     | ${'CABFDE'}                     | ${15}        | ${false}
+    ${'input.txt'}  | ${5}    | ${60}    | ${'OVXZCBDEKHPSINTFJLUYRWGAMQ'} | ${955}       | ${false}
+  `(
+    'given $file',
+    ({ file, expectedOrder, expectedTime, skip, workers, baseTime }) => {
+      const TEST = skip ? test.skip : test
+      let input: string
+
+      beforeEach(async () => {
+        input = await getInput(__dirname, file)
+      })
+
+      TEST('it finds the order of operations', () => {
+        expect(findTimedInstructionsOrder(input, workers, baseTime)).toEqual(
+          expectedOrder
+        )
+      })
+
+      TEST('it finds the amount of time to assemble the sercret device', () => {
+        expect(findTimeToCompletion(input, workers, baseTime)).toEqual(
+          expectedTime
+        )
+      })
+    }
+  )
 })
