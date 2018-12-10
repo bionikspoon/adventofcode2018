@@ -26,6 +26,15 @@ export function findLargestFiniteArea(input: string) {
   return counter.mostCommon()[0][1]
 }
 
+export function findMostConnectedRegion(input: string, limit: number) {
+  const points = pipe(
+    toLines,
+    toPoints
+  )(input)
+
+  return countConnections(points, limit)
+}
+
 const toLines = pipe(
   trim,
   split('\n'),
@@ -48,6 +57,18 @@ const toPoints = pipe(
     y,
   }))
 )
+const countConnections = (points: IPoint[], limit: number) => {
+  const { top, left, bottom, right } = findBoundingBox(points)
+
+  return Array.from(iteratePoints({ top, left, right, bottom }))
+    .map(mapPoint =>
+      points.reduce(
+        (acc, point) => acc + findManhattenDistance(point, mapPoint),
+        0
+      )
+    )
+    .filter(count => count < limit).length
+}
 
 const countClosest = (points: IPoint[]) => {
   const finitePoints = getFinitePoints(points)
@@ -92,7 +113,7 @@ function* iteratePoints({
 }) {
   for (let x = left; x <= right; x++) {
     for (let y = top; y <= bottom; y++) {
-      yield { id: 'id', x, y }
+      yield { id: '', x, y }
     }
   }
 }
