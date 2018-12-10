@@ -3,9 +3,9 @@ import { getInput } from '../utils/tests'
 
 describe('part 1', () => {
   describe.each`
-    file                   | expected | skip
-    ${'part-1-case-1.txt'} | ${17}    | ${false}
-    ${'input.txt'}         | ${3569}  | ${true}
+    file            | expected | skip
+    ${'case-1.txt'} | ${17}    | ${false}
+    ${'input.txt'}  | ${3569}  | ${true}
   `('#findLargestFiniteArea given $file', ({ file, expected, skip }) => {
     const TEST = skip ? test.skip : test
     let input: string
@@ -22,9 +22,9 @@ describe('part 1', () => {
 
 describe('part 2', () => {
   describe.each`
-    file                   | limit    | expected | skip
-    ${'part-1-case-1.txt'} | ${32}    | ${16}    | ${false}
-    ${'input.txt'}         | ${10000} | ${48978} | ${false}
+    file            | limit    | expected | skip
+    ${'case-1.txt'} | ${32}    | ${16}    | ${false}
+    ${'input.txt'}  | ${10000} | ${48978} | ${false}
   `(
     '#findMostConnectedRegion given $file',
     ({ file, expected, skip, limit }) => {
