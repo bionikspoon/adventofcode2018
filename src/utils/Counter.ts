@@ -1,4 +1,5 @@
 import R from 'ramda'
+import util from 'util'
 
 export default class Counter {
   private counts: { [key: string]: number }
@@ -38,5 +39,9 @@ export default class Counter {
 
   public entries() {
     return Object.entries(this.counts)
+  }
+
+  public [util.inspect.custom]() {
+    return `Counter { ${JSON.stringify(this.counts, null, 2)} }`
   }
 }
