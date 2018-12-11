@@ -3,13 +3,13 @@ import { times } from 'ramda'
 export function decodeLicenseWithSum(input: string) {
   return toTree(input)
     .listMeta()
-    .reduce((l, r) => l + r)
+    .reduce(sum)
 }
 
 export function decodeLicenseWithIndex(input: string) {
   return toTree(input)
     .listIndexValues()
-    .reduce((l, r) => l + r)
+    .reduce(sum)
 }
 
 const RE_PARSE_LINE = /\d+/gmu
@@ -20,6 +20,8 @@ const toTree = (input: string) =>
     .match(RE_PARSE_LINE)!
     .map(line => parseInt(line.trim()))
     .reduce((tree, n) => tree.build(n), new Node(null))
+
+const sum = (l: number, r: number) => l + r
 
 class Node {
   private operation: 'CREATE_CHILDREN' | 'SET_META_SIZE' | 'ADD_META' | 'DONE' =
@@ -39,7 +41,7 @@ class Node {
   }
 
   public listIndexValues() {
-    const result = Array.from(this.iterateIndexedValue())
+    const result = Array.from(this.iterateIndexedValues())
 
     return result
   }
@@ -89,22 +91,26 @@ class Node {
     return done ? this : next
   }
 
-  private *iterateIndexedValue(): IterableIterator<number> {
-    if (this.children.length === 0) return yield* this.meta.values()
-
-    for (const index of this.meta) {
-      if (index === 0) continue
-      const child = this.children[index - 1]
-
-      if (child) yield* child.iterateIndexedValue()
-    }
-  }
-
   private *iterateMeta(): IterableIterator<number> {
     yield* this.meta.values()
 
     for (const child of this.children) {
       yield* child.iterateMeta()
+    }
+  }
+
+  private *iterateIndexedValues(): IterableIterator<number> {
+    if (this.children.length === 0) return yield* this.meta.values()
+
+    yield* this.iterateIndexedChildren()
+  }
+
+  private *iterateIndexedChildren() {
+    for (const index of this.meta) {
+      if (index === 0) continue
+      const child = this.children[index - 1]
+
+      if (child) yield* child.iterateIndexedValues()
     }
   }
 }
