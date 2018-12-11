@@ -1,12 +1,22 @@
 import { times } from 'ramda'
 
-export function decodeLicense(input: string) {
+export function decodeLicenseWithSum(input: string) {
   return input
     .trim()
     .match(RE_PARSE_LINE)!
     .map(line => parseInt(line.trim()))
     .reduce((tree, n) => tree.add(n), new Node(null))
     .listMeta()
+    .reduce((l, r) => l + r)
+}
+
+export function decodeLicenseWithIndex(input: string) {
+  return input
+    .trim()
+    .match(RE_PARSE_LINE)!
+    .map(line => parseInt(line.trim()))
+    .reduce((tree, n) => tree.add(n), new Node(null))
+    .listIndexValues()
     .reduce((l, r) => l + r)
 }
 
@@ -21,6 +31,12 @@ class Node {
 
   constructor(parent: Node | null) {
     this.parent = parent
+  }
+
+  public listIndexValues() {
+    const result = Array.from(this.iterateIndexedValue())
+
+    return result
   }
   public listMeta() {
     return Array.from(this.iterateMeta())
@@ -60,14 +76,31 @@ class Node {
     return done ? this : next
   }
 
+  private *iterateIndexedValue(): IterableIterator<number> {
+    if (this.meta === null || this.children === null) {
+      throw new Error('Something went wrong')
+    }
+
+    if (this.children.length === 0) {
+      yield* this.meta.values()
+      return
+    }
+
+    for (const index of this.meta) {
+      if (index === 0) continue
+      const child = this.children[index - 1]
+      if (!child) continue
+
+      yield* child.iterateIndexedValue()
+    }
+  }
+
   private *iterateMeta(): IterableIterator<number> {
     if (this.meta === null || this.children === null) {
       throw new Error('Something went wrong')
     }
 
-    for (const value of this.meta) {
-      yield value
-    }
+    yield* this.meta.values()
 
     for (const child of this.children) {
       yield* child.iterateMeta()
