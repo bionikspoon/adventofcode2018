@@ -5,7 +5,7 @@ export function decodeLicenseWithSum(input: string) {
     .trim()
     .match(RE_PARSE_LINE)!
     .map(line => parseInt(line.trim()))
-    .reduce((tree, n) => tree.add(n), new Node(null))
+    .reduce((tree, n) => tree.build(n), new Node(null))
     .listMeta()
     .reduce((l, r) => l + r)
 }
@@ -15,7 +15,7 @@ export function decodeLicenseWithIndex(input: string) {
     .trim()
     .match(RE_PARSE_LINE)!
     .map(line => parseInt(line.trim()))
-    .reduce((tree, n) => tree.add(n), new Node(null))
+    .reduce((tree, n) => tree.build(n), new Node(null))
     .listIndexValues()
     .reduce((l, r) => l + r)
 }
@@ -23,14 +23,20 @@ export function decodeLicenseWithIndex(input: string) {
 const RE_PARSE_LINE = /\d+/gmu
 
 class Node {
+  private state: 'CREATE_CHILDREN' | 'SET_META_SIZE' | 'ADD_META' | 'DONE' =
+    'CREATE_CHILDREN'
   private parent: Node | null
-  private children: Node[] | null = null
+  private children: Node[] = []
   private childrenIterator: IterableIterator<Node> | null = null
-  private meta: number[] | null = null
+  private meta: number[] = []
   private metaSize: number | null = null
 
   constructor(parent: Node | null) {
     this.parent = parent
+  }
+
+  public build(n: number): Node {
+    return this[this.state](n)
   }
 
   public listIndexValues() {
@@ -41,20 +47,22 @@ class Node {
   public listMeta() {
     return Array.from(this.iterateMeta())
   }
-  public add(n: number) {
-    if (this.children === null) {
-      this.children = times(() => new Node(this), n)
-      return this
-    }
 
-    if (this.meta === null) {
-      this.meta = []
-      this.metaSize = n
-      this.childrenIterator = this.children.values()
+  private CREATE_CHILDREN(n: number) {
+    this.state = 'SET_META_SIZE'
+    this.children = times(() => new Node(this), n)
+    return this
+  }
 
-      return this.next()
-    }
+  private SET_META_SIZE(n: number) {
+    this.state = 'ADD_META'
+    this.metaSize = n
+    this.childrenIterator = this.children.values()
 
+    return this.next()
+  }
+
+  private ADD_META(n: number) {
     if (this.meta.length < this.metaSize! - 1) {
       this.meta.push(n)
 
@@ -62,6 +70,7 @@ class Node {
     }
 
     if (this.meta.length < this.metaSize!) {
+      this.state = 'DONE'
       this.meta.push(n)
 
       if (this.parent === null) return this // This is the last node.
@@ -70,7 +79,12 @@ class Node {
 
     throw new Error('Something went wrong')
   }
-  protected next() {
+
+  private DONE(_: number): Node {
+    throw new Error('Something went wrong')
+  }
+
+  private next() {
     const { done, value: next } = this.childrenIterator!.next()
 
     return done ? this : next
