@@ -1,29 +1,28 @@
 import { times } from 'ramda'
 
 export function decodeLicenseWithSum(input: string) {
-  return input
-    .trim()
-    .match(RE_PARSE_LINE)!
-    .map(line => parseInt(line.trim()))
-    .reduce((tree, n) => tree.build(n), new Node(null))
+  return toTree(input)
     .listMeta()
     .reduce((l, r) => l + r)
 }
 
 export function decodeLicenseWithIndex(input: string) {
-  return input
-    .trim()
-    .match(RE_PARSE_LINE)!
-    .map(line => parseInt(line.trim()))
-    .reduce((tree, n) => tree.build(n), new Node(null))
+  return toTree(input)
     .listIndexValues()
     .reduce((l, r) => l + r)
 }
 
 const RE_PARSE_LINE = /\d+/gmu
 
+const toTree = (input: string) =>
+  input
+    .trim()
+    .match(RE_PARSE_LINE)!
+    .map(line => parseInt(line.trim()))
+    .reduce((tree, n) => tree.build(n), new Node(null))
+
 class Node {
-  private state: 'CREATE_CHILDREN' | 'SET_META_SIZE' | 'ADD_META' | 'DONE' =
+  private operation: 'CREATE_CHILDREN' | 'SET_META_SIZE' | 'ADD_META' | 'DONE' =
     'CREATE_CHILDREN'
   private parent: Node | null
   private children: Node[] = []
@@ -36,7 +35,7 @@ class Node {
   }
 
   public build(n: number): Node {
-    return this[this.state](n)
+    return this[this.operation](n)
   }
 
   public listIndexValues() {
@@ -49,13 +48,13 @@ class Node {
   }
 
   private CREATE_CHILDREN(n: number) {
-    this.state = 'SET_META_SIZE'
+    this.operation = 'SET_META_SIZE'
     this.children = times(() => new Node(this), n)
     return this
   }
 
   private SET_META_SIZE(n: number) {
-    this.state = 'ADD_META'
+    this.operation = 'ADD_META'
     this.metaSize = n
     this.childrenIterator = this.children.values()
 
@@ -70,7 +69,7 @@ class Node {
     }
 
     if (this.meta.length < this.metaSize!) {
-      this.state = 'DONE'
+      this.operation = 'DONE'
       this.meta.push(n)
 
       if (this.parent === null) return this // This is the last node.
@@ -91,29 +90,17 @@ class Node {
   }
 
   private *iterateIndexedValue(): IterableIterator<number> {
-    if (this.meta === null || this.children === null) {
-      throw new Error('Something went wrong')
-    }
-
-    if (this.children.length === 0) {
-      yield* this.meta.values()
-      return
-    }
+    if (this.children.length === 0) return yield* this.meta.values()
 
     for (const index of this.meta) {
       if (index === 0) continue
       const child = this.children[index - 1]
-      if (!child) continue
 
-      yield* child.iterateIndexedValue()
+      if (child) yield* child.iterateIndexedValue()
     }
   }
 
   private *iterateMeta(): IterableIterator<number> {
-    if (this.meta === null || this.children === null) {
-      throw new Error('Something went wrong')
-    }
-
     yield* this.meta.values()
 
     for (const child of this.children) {
