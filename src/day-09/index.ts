@@ -1,5 +1,6 @@
 import { map, times } from 'ramda'
 import util from 'util'
+
 const inspect = util.inspect.custom
 export function findWinningScore(input: string) {
   const { playersCount, marblesCount } = parseLine(input)
@@ -72,9 +73,9 @@ class Scoreboard {
 }
 
 class Marble {
+  public value: number
   private clockwise: Marble
   private counterClockwise: Marble
-  public value: number
 
   constructor(value: number) {
     this.value = value
@@ -83,23 +84,11 @@ class Marble {
   }
 
   public goClockwise(n: number = 1) {
-    // tslint:disable-next-line:no-this-assignment
-    let result: Marble = this
-    times(() => {
-      result = result.clockwise
-    }, n)
-
-    return result
+    return this.goDirection('clockwise', n)
   }
 
   public goCounterClockwise(n: number = 1) {
-    // tslint:disable-next-line:no-this-assignment
-    let result: Marble = this
-    times(() => {
-      result = result.counterClockwise
-    }, n)
-
-    return result
+    return this.goDirection('counterClockwise', n)
   }
 
   public remove() {
@@ -132,5 +121,14 @@ class Marble {
     return depth > 1
       ? `Marble { ${l2S} <- ${l1S} <- ${cS} -> ${r1S} -> ${r2S} }`
       : `Marble { ${l1S} <- ${cS} -> ${r1S} }`
+  }
+
+  private goDirection(direction: 'clockwise' | 'counterClockwise', n: number) {
+    // tslint:disable-next-line:no-this-assignment
+    let result: Marble = this
+    times(() => {
+      result = result[direction]
+    }, n)
+    return result
   }
 }
