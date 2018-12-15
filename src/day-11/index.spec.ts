@@ -1,7 +1,7 @@
 import {
   calculateCellPowerLevel,
-  calculateGridPowerLevel,
-  findAllCellPowers,
+  findBestCellFactory,
+  findMostPowerful3by3grid,
   findMostPowerfulGrid,
 } from '.'
 
@@ -13,43 +13,49 @@ describe('part 1', () => {
   `('given grid serial number: $serialNumber', ({ serialNumber, expected }) => {
     describe('#findMostPowerfulGrid', () => {
       test('it finds the grid with the largest total power', () => {
-        expect(findMostPowerfulGrid(serialNumber)).toEqual(expected)
+        expect(findMostPowerful3by3grid(serialNumber)).toEqual(expected)
       })
     })
 
     describe('#findAllCellPowers', () => {
       test('it matches snapshot', () => {
-        expect(findAllCellPowers(serialNumber)).toMatchSnapshot()
+        expect(findBestCellFactory(serialNumber)(3)).toMatchSnapshot()
       })
     })
   })
-
-  describe.each`
-    x      | y      | serialNumber | cellPowerLevel | gridPowerLevel
-    ${122} | ${79}  | ${57}        | ${-5}          | ${false}
-    ${217} | ${196} | ${39}        | ${0}           | ${false}
-    ${101} | ${153} | ${71}        | ${4}           | ${false}
-    ${33}  | ${45}  | ${18}        | ${4}           | ${29}
-    ${21}  | ${61}  | ${42}        | ${4}           | ${30}
-  `(
-    'given coordinates ($x,$y) with serial number ($serialNumber)',
-    ({ x, y, serialNumber, cellPowerLevel, gridPowerLevel }) => {
-      test(`#calculateCellPowerLevel has a cell power level of ${cellPowerLevel}`, () => {
-        expect(calculateCellPowerLevel(x, y, serialNumber)).toEqual(
-          cellPowerLevel
-        )
-      })
-
-      if (gridPowerLevel === false) return
-      test(`#calculateGridPowerLevel has a grid power level of ${gridPowerLevel}`, () => {
-        expect(calculateGridPowerLevel(x, y, serialNumber)).toEqual(
-          gridPowerLevel
-        )
-      })
-    }
-  )
 })
 
-// Fuel cell at  122,79, grid serial number 57: power level -5.
-// Fuel cell at 217,196, grid serial number 39: power level  0.
-// Fuel cell at 101,153, grid serial number 71: power level  4.
+describe('part 2', () => {
+  describe.each`
+    serialNumber | expected
+    ${18}        | ${'90,269,16'}
+    ${42}        | ${'232,251,12'}
+    ${7672}      | ${'232,251,12'}
+  `('given grid serial number: $serialNumber', ({ serialNumber, expected }) => {
+    describe('#findMostPowerfulGrid', () => {
+      test('it finds the grid with the largest total power', () => {
+        expect(findMostPowerfulGrid(serialNumber)).toEqual(expected)
+      })
+    })
+  })
+})
+
+describe.each`
+  x      | y      | serialNumber | cellPowerLevel
+  ${122} | ${79}  | ${57}        | ${-5}
+  ${217} | ${196} | ${39}        | ${0}
+  ${101} | ${153} | ${71}        | ${4}
+  ${33}  | ${45}  | ${18}        | ${4}
+  ${21}  | ${61}  | ${42}        | ${4}
+  ${90}  | ${269} | ${18}        | ${3}
+  ${232} | ${251} | ${42}        | ${2}
+`(
+  'given coordinates ($x,$y) with serial number ($serialNumber)',
+  ({ x, y, serialNumber, cellPowerLevel }) => {
+    test(`#calculateCellPowerLevel has a cell power level of ${cellPowerLevel}`, () => {
+      expect(calculateCellPowerLevel(x, y, serialNumber)).toEqual(
+        cellPowerLevel
+      )
+    })
+  }
+)
