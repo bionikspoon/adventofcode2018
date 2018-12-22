@@ -99,9 +99,68 @@ describe('LinkedList', () => {
   describe('#from', () => {
     test('it is sane', () => {
       const expected = [10, 15, 7, 11, 12, 13, 14, 6]
-      const list = LinkedList.from(expected.map(n => new Node(n)))
+      const list = LinkedList.from(expected)
 
-      expect(Array.from(list)).toEqual(expected)
+      expect(list.toArray()).toEqual(expected)
+    })
+  })
+
+  describe('#mapNode', () => {
+    test('it can map over a list', () => {
+      const list = LinkedList.from([1, 2, 3, 4, 5])
+      const expected = [3, 4, 5, 6, 7]
+
+      expect(list.mapNode(node => new Node(node.value + 2)).toArray()).toEqual(
+        expected
+      )
+    })
+
+    test('it can be immutable', () => {
+      const expected = [1, 2, 3, 4, 5]
+      const list = LinkedList.from(expected)
+      list.mapNode(node => new Node(node.value + 2))
+
+      expect(list.toArray()).toEqual(expected)
+    })
+  })
+
+  describe('#map', () => {
+    test('it can map over values', () => {
+      const list = LinkedList.from([1, 2, 3, 4, 5])
+      const expected = [3, 4, 5, 6, 7]
+
+      expect(list.map(x => x + 2).toArray()).toEqual(expected)
+    })
+  })
+
+  describe('#mapWindow', () => {
+    test('it can create a window to map over', () => {
+      const list = LinkedList.from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+      const expected = [
+        '  ABC',
+        ' ABCD',
+        'ABCDE',
+        'BCDEF',
+        'CDEFG',
+        'DEFGH',
+        'EFGH ',
+        'FGH  ',
+      ]
+
+      expect(
+        list
+          .mapWindow(([l2, l1, c, r1, r2]) => l2 + l1 + c + r1 + r2, 2, 2, ' ')
+          .toArray()
+      ).toEqual(expected)
+    })
+
+    test('it can work without a fill value', () => {
+      const list = LinkedList.from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+      const expected = ['ABC', 'BCD', 'CDE', 'DEF', 'EFG', 'FGH']
+
+      expect(list.mapWindow(([c, r1, r2]) => c + r1 + r2, 2).toArray()).toEqual(
+        expected
+      )
     })
   })
 })

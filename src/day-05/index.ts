@@ -1,4 +1,4 @@
-import { LinkedList, Node } from './LinkedList'
+import { LinkedList, Node } from '../utils/LinkedList'
 
 // PART 1
 export function reducePolymers(input: string) {
@@ -49,10 +49,7 @@ function isUpperCase(text: string) {
 }
 
 function createList(input: string) {
-  const nodes = input
-    .trim()
-    .split('')
-    .map(char => new Node(char))
+  const nodes = input.trim().split('')
 
   return LinkedList.from(nodes)
 }

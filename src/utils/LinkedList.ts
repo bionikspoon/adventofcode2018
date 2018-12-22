@@ -1,11 +1,11 @@
 import util from 'util'
 
 export class LinkedList<T> {
-  public static from<T>(xs: Array<Node<T>>) {
+  public static from<T>(xs: T[]) {
     const list = new LinkedList<T>()
 
     for (const x of xs) {
-      list.insertEnd(x)
+      list.insertEnd(new Node(x))
     }
 
     return list
@@ -82,6 +82,41 @@ export class LinkedList<T> {
     return this
   }
 
+  public toArray() {
+    return Array.from(this)
+  }
+
+  public mapNode<U>(fn: (node: Node<T>) => Node<U> | null): LinkedList<U> {
+    const list = new LinkedList<U>()
+
+    let node = this.firstNode
+
+    while (node !== null) {
+      const next = fn(node)
+      if (next instanceof Node) list.insertEnd(next)
+      node = node.next
+    }
+
+    return list
+  }
+
+  public mapWindow(
+    fn: (window: T[]) => T,
+    nextAmount: number,
+    prevAmount: number = 0,
+    fill?: T
+  ) {
+    return this.mapNode(node => {
+      const window = node.windowValues(nextAmount, prevAmount, fill)
+      if (window.length !== nextAmount + prevAmount + 1) return null
+      return new Node(fn(window))
+    })
+  }
+
+  public map<U>(fn: (value: T) => U) {
+    return this.mapNode((node: Node<T>): Node<U> => new Node(fn(node.value)))
+  }
+
   public inspect(): string {
     return `LinkedList { ${this.firstNode!.join(' -> ')} }`
   }
@@ -111,7 +146,7 @@ export class Node<T> {
     this.value = value
   }
 
-  public join(str: string): string {
+  public join(str: string = ' -> '): string {
     if (this.next === null) return this.inspect()
 
     return `${this.inspect()} ${str} ${this.next.join(str)}`
@@ -123,5 +158,47 @@ export class Node<T> {
 
   public [util.inspect.custom]() {
     return this.inspect()
+  }
+
+  public windowValues(nextAmount: number, prevAmount: number, fill?: T) {
+    return [
+      ...this.prevValues(prevAmount, fill),
+      this.value,
+      ...this.nextValues(nextAmount, fill),
+    ]
+  }
+
+  private prevValues(count: number, fill?: T) {
+    const results = []
+    let node = this.prev
+
+    for (let i = 0; i < count; i++) {
+      if (node !== null) {
+        results.unshift(node.value)
+        node = node.prev
+        continue
+      }
+
+      if (fill === undefined) break
+      results.unshift(fill)
+    }
+    return results
+  }
+
+  private nextValues(count: number, fill?: T) {
+    const results = []
+    let node = this.next
+
+    for (let i = 0; i < count; i++) {
+      if (node !== null) {
+        results.push(node.value)
+        node = node.next
+        continue
+      }
+
+      if (fill === undefined) break
+      results.push(fill)
+    }
+    return results
   }
 }
