@@ -1,5 +1,5 @@
-import { getInput } from '../utils/tests'
 import { findFirstCollision } from '.'
+import { getInput } from '../utils/tests'
 
 describe('day-13', () => {
   describe.each`
