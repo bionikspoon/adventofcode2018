@@ -86,6 +86,18 @@ export class LinkedList<T> {
     return Array.from(this)
   }
 
+  public unshift(value: T) {
+    this.insertBeginning(new Node(value))
+
+    return this
+  }
+
+  public push(value: T) {
+    this.insertEnd(new Node(value))
+
+    return this
+  }
+
   public mapNode<U>(fn: (node: Node<T>) => Node<U> | null): LinkedList<U> {
     const list = new LinkedList<U>()
 
@@ -101,7 +113,7 @@ export class LinkedList<T> {
   }
 
   public mapWindow(
-    fn: (window: T[]) => T,
+    fn: (window: T[], value: T) => T,
     nextAmount: number,
     prevAmount: number = 0,
     fill?: T
@@ -109,7 +121,7 @@ export class LinkedList<T> {
     return this.mapNode(node => {
       const window = node.windowValues(nextAmount, prevAmount, fill)
       if (window.length !== nextAmount + prevAmount + 1) return null
-      return new Node(fn(window))
+      return new Node(fn(window, node.value))
     })
   }
 
@@ -168,7 +180,7 @@ export class Node<T> {
     ]
   }
 
-  private prevValues(count: number, fill?: T) {
+  public prevValues(count: number, fill?: T) {
     const results = []
     let node = this.prev
 
@@ -185,7 +197,7 @@ export class Node<T> {
     return results
   }
 
-  private nextValues(count: number, fill?: T) {
+  public nextValues(count: number, fill?: T) {
     const results = []
     let node = this.next
 

@@ -162,5 +162,14 @@ describe('LinkedList', () => {
         expected
       )
     })
+
+    test('it sends currentValue as a second param', () => {
+      const list = LinkedList.from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+      const expected = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
+
+      expect(
+        list.mapWindow((window, value) => value.repeat(3), 2).toArray()
+      ).toEqual(expected)
+    })
   })
 })
