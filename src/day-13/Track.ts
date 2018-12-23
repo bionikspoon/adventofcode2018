@@ -97,8 +97,8 @@ export default class Track {
 
 const sortCarts = sortWith<Cart>([ascend(prop('y')), ascend(prop('x'))])
 
-const HORIZONTAL_SYMBOLS = ['>', '<', '-', '+']
-const VERTICAL_SYMBOLS = ['|', 'v', '^', '+']
+const HORIZONTAL_SYMBOLS = ['>', '<', '-']
+const VERTICAL_SYMBOLS = ['|', 'v', '^']
 
 function getSegmentConstructor(
   symbol: SegmentSymbol,
@@ -106,10 +106,10 @@ function getSegmentConstructor(
   y: number,
   lines: SegmentSymbol[][]
 ): new (x: number, y: number) => Segment.Segment {
-  if (symbol === '+') return Segment.Intersection
-  if (symbol === ' ') return Segment.Empty
   if (HORIZONTAL_SYMBOLS.includes(symbol)) return Segment.Horizontal
   if (VERTICAL_SYMBOLS.includes(symbol)) return Segment.Vertical
+  if (symbol === ' ') return Segment.Empty
+  if (symbol === '+') return Segment.Intersection
   if (symbol === '/') return getSENWSegmentConstructor(x, y, lines)
   if (symbol === '\\') return getSWNESegmentConstructor(x, y, lines)
 
@@ -120,7 +120,7 @@ function getSENWSegmentConstructor(
   x: number,
   y: number,
   lines: SegmentSymbol[][]
-) {
+): new (x: number, y: number) => Segment.Segment {
   const isSymbol = isSymbolFactory(lines)
   if (
     isSymbol(x - 1, y, HORIZONTAL_SYMBOLS) &&
@@ -143,7 +143,7 @@ function getSWNESegmentConstructor(
   x: number,
   y: number,
   lines: SegmentSymbol[][]
-) {
+): new (x: number, y: number) => Segment.Segment {
   const isSymbol = isSymbolFactory(lines)
 
   if (
@@ -163,6 +163,8 @@ function getSWNESegmentConstructor(
 }
 
 function isSymbolFactory(lines: SegmentSymbol[][]) {
-  return (x: number, y: number, symbols: string[]) =>
-    Array.isArray(lines[y]) && symbols.includes(lines[y][x])
+  return (x: number, y: number, _symbols: string[]) => {
+    const symbols = ['+', ..._symbols]
+    return Array.isArray(lines[y]) && symbols.includes(lines[y][x])
+  }
 }
