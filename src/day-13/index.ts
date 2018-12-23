@@ -5,9 +5,13 @@ export function findFirstCollision(input: string) {
   const lines = input
     .split('\n')
     .map(line => line.split('')) as SegmentSymbol[][]
-  return Track.fromLines(lines)
-    .tick()
-    .tick()
-    .tick()
-    .repr()
+
+  try {
+    const track = Track.fromLines(lines)
+    while (true) {
+      track.tick()
+    }
+  } catch (cart) {
+    return { x: cart.x, y: cart.y }
+  }
 }
