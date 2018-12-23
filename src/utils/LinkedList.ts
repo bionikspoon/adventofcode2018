@@ -1,4 +1,5 @@
 import util from 'util'
+import { reverse } from 'ramda'
 
 export class LinkedList<T> {
   public static from<T>(xs: T[]) {
@@ -181,30 +182,21 @@ export class Node<T> {
   }
 
   public prevValues(count: number, fill?: T) {
-    const results = []
-    let node = this.prev
-
-    for (let i = 0; i < count; i++) {
-      if (node !== null) {
-        results.unshift(node.value)
-        node = node.prev
-        continue
-      }
-
-      if (fill === undefined) break
-      results.unshift(fill)
-    }
-    return results
+    return reverse(this.collectValues('prev', count, fill))
   }
 
   public nextValues(count: number, fill?: T) {
+    return this.collectValues('next', count, fill)
+  }
+
+  private collectValues(direction: 'next' | 'prev', count: number, fill?: T) {
     const results = []
-    let node = this.next
+    let node = this[direction]
 
     for (let i = 0; i < count; i++) {
       if (node !== null) {
         results.push(node.value)
-        node = node.next
+        node = node[direction]
         continue
       }
 
