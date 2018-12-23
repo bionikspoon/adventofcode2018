@@ -97,56 +97,72 @@ export default class Track {
 
 const sortCarts = sortWith<Cart>([ascend(prop('y')), ascend(prop('x'))])
 
+const HORIZONTAL_SYMBOLS = ['>', '<', '-', '+']
+const VERTICAL_SYMBOLS = ['|', 'v', '^', '+']
+
 function getSegmentConstructor(
   symbol: SegmentSymbol,
   x: number,
   y: number,
   lines: SegmentSymbol[][]
 ): new (x: number, y: number) => Segment.Segment {
-  const horizontalSymbols = ['>', '<', '-', '+']
-  const verticalSymbols = ['|', 'v', '^', '+']
-  const isSymbol = {
-    horizontal: isSymbolFactory(lines, horizontalSymbols),
-    vertical: isSymbolFactory(lines, verticalSymbols),
-  }
-
   if (symbol === '+') return Segment.Intersection
   if (symbol === ' ') return Segment.Empty
-  if (horizontalSymbols.includes(symbol)) return Segment.Horizontal
-  if (verticalSymbols.includes(symbol)) return Segment.Vertical
-  if (symbol === '/') return getSENWSegmentConstructor(x, y, isSymbol)
-  if (symbol === '\\') return getSWNESegmentConstructor(x, y, isSymbol)
+  if (HORIZONTAL_SYMBOLS.includes(symbol)) return Segment.Horizontal
+  if (VERTICAL_SYMBOLS.includes(symbol)) return Segment.Vertical
+  if (symbol === '/') return getSENWSegmentConstructor(x, y, lines)
+  if (symbol === '\\') return getSWNESegmentConstructor(x, y, lines)
 
   throw new Error('Something went wrong.')
 }
 
-interface IIsSymbol {
-  horizontal: (x: number, y: number) => boolean
-  vertical: (x: number, y: number) => boolean
-}
-
-function getSENWSegmentConstructor(x: number, y: number, isSymbol: IIsSymbol) {
-  if (isSymbol.horizontal(x - 1, y) && isSymbol.vertical(x, y - 1)) {
+function getSENWSegmentConstructor(
+  x: number,
+  y: number,
+  lines: SegmentSymbol[][]
+) {
+  const isSymbol = isSymbolFactory(lines)
+  if (
+    isSymbol(x - 1, y, HORIZONTAL_SYMBOLS) &&
+    isSymbol(x, y - 1, VERTICAL_SYMBOLS)
+  ) {
     return Segment.SECorner
   }
-  if (isSymbol.horizontal(x + 1, y) && isSymbol.vertical(x, y + 1)) {
+
+  if (
+    isSymbol(x + 1, y, HORIZONTAL_SYMBOLS) &&
+    isSymbol(x, y + 1, VERTICAL_SYMBOLS)
+  ) {
     return Segment.NWCorner
   }
 
   throw new Error('Something went wrong.')
 }
 
-function getSWNESegmentConstructor(x: number, y: number, isSymbol: IIsSymbol) {
-  if (isSymbol.horizontal(x + 1, y) && isSymbol.vertical(x, y - 1)) {
+function getSWNESegmentConstructor(
+  x: number,
+  y: number,
+  lines: SegmentSymbol[][]
+) {
+  const isSymbol = isSymbolFactory(lines)
+
+  if (
+    isSymbol(x + 1, y, HORIZONTAL_SYMBOLS) &&
+    isSymbol(x, y - 1, VERTICAL_SYMBOLS)
+  ) {
     return Segment.SWCorner
   }
-  if (isSymbol.horizontal(x - 1, y) && isSymbol.vertical(x, y + 1)) {
+
+  if (
+    isSymbol(x - 1, y, HORIZONTAL_SYMBOLS) &&
+    isSymbol(x, y + 1, VERTICAL_SYMBOLS)
+  ) {
     return Segment.NECorner
   }
   throw new Error('Something went wrong.')
 }
 
-function isSymbolFactory(lines: SegmentSymbol[][], symbols: string[]) {
-  return (x: number, y: number) =>
+function isSymbolFactory(lines: SegmentSymbol[][]) {
+  return (x: number, y: number, symbols: string[]) =>
     Array.isArray(lines[y]) && symbols.includes(lines[y][x])
 }
