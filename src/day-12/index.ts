@@ -8,53 +8,68 @@ function simulateGenerations(input: string, generations: number) {
   const data = toData(lines)
   let { state } = data
   let offset = 0
+  const simulateGeneration = simulateGenerationFactory(data.notes)
 
   for (let i = 0; i < generations; i++) {
-    state = pad(state.mapWindow(simulateGeneration, 2, 2, '.'))
+    ;[offset, state] = pad(
+      offset,
+      state.mapWindow(simulateGeneration, 2, 2, '.')
+    )
   }
 
   return { state, offset }
+}
 
-  function simulateGeneration(window: string[], value: string): string {
-    for (const [note, match] of data.notes) {
+function simulateGenerationFactory(
+  notes: Array<[[string, string, string, string, string], string]>
+) {
+  return (window: string[], value: string) => {
+    for (const [note, match] of notes) {
       if (equals(note, window)) return match
     }
     return value
   }
+}
 
-  function padLeft(list: LinkedList<string>) {
-    if (list.firstNode === null) return list
-    for (let i = 0; i < 2; i++) {
-      if (
-        list.firstNode.value !== '.' ||
-        head(list.firstNode.nextValues(1)) !== '.'
-      ) {
-        offset--
-        list.unshift('.')
-      }
+function padLeft(
+  offset: number,
+  list: LinkedList<string>
+): [number, LinkedList<string>] {
+  if (list.firstNode === null) return [offset, list]
+  for (let i = 0; i < 2; i++) {
+    if (
+      list.firstNode.value !== '.' ||
+      head(list.firstNode.nextValues(1)) !== '.'
+    ) {
+      offset--
+      list.unshift('.')
     }
-
-    return list
   }
 
-  function padRight(list: LinkedList<string>) {
-    if (list.lastNode === null) return list
+  return [offset, list]
+}
 
-    for (let i = 0; i < 2; i++) {
-      if (
-        list.lastNode.value !== '.' ||
-        head(list.lastNode.prevValues(1)) !== '.'
-      ) {
-        list.push('.')
-      }
+function padRight(list: LinkedList<string>) {
+  if (list.lastNode === null) return list
+
+  for (let i = 0; i < 2; i++) {
+    if (
+      list.lastNode.value !== '.' ||
+      head(list.lastNode.prevValues(1)) !== '.'
+    ) {
+      list.push('.')
     }
-
-    return list
   }
 
-  function pad(list: LinkedList<string>) {
-    return padRight(padLeft(list))
-  }
+  return list
+}
+
+function pad(
+  offset: number,
+  list: LinkedList<string>
+): [number, LinkedList<string>] {
+  const [nextOffset, nextList] = padLeft(offset, list)
+  return [nextOffset, padRight(nextList)]
 }
 
 export function simulateGenerationsRepr(input: string, generations: number) {
