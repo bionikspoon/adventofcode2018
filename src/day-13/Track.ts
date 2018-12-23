@@ -44,7 +44,28 @@ export default class Track {
         .join('\n')
     )
   }
-  public tick() {
+
+  public findFirstCollision() {
+    try {
+      while (true) {
+        this.shortTick()
+      }
+    } catch ([cart]) {
+      return cart as Cart
+    }
+
+    throw new Error('Something went wrong.')
+  }
+
+  public findLastCart() {
+    while (this.carts.length > 1) {
+      this.longTick()
+    }
+
+    return this.carts[0]
+  }
+
+  private shortTick() {
     const carts = sortCarts(this.carts)
 
     for (const cart of carts) {
@@ -52,6 +73,21 @@ export default class Track {
     }
 
     return this
+  }
+
+  private longTick() {
+    const carts = sortCarts(this.carts)
+
+    for (const cart of carts) {
+      if (!this.carts.includes(cart)) continue
+      try {
+        this.moveCart(cart)
+      } catch ([cart1, cart2]) {
+        this.carts = this.carts.filter(c => !c.crashed)
+        this.segments[cart1.y][cart1.x].removeCart()
+        this.segments[cart2.y][cart2.x].removeCart()
+      }
+    }
   }
 
   private moveCart(cart: Cart) {

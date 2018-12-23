@@ -19,7 +19,8 @@ export abstract class Segment {
     }
 
     this.cart.setCrashed()
-    throw cart
+    cart.setCrashed()
+    throw [this.cart, cart]
   }
   public removeCart() {
     this.cart = null
