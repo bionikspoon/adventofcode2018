@@ -1,4 +1,4 @@
-import { ascend, head, prop, sortWith } from 'ramda'
+import { ascend, prop, sortWith } from 'ramda'
 import Cart from './Cart'
 import * as Segment from './Segment'
 import { isCartSymbol, SegmentSymbol } from './types'
@@ -6,31 +6,16 @@ import { isCartSymbol, SegmentSymbol } from './types'
 export default class Track {
   public static fromLines(lines: SegmentSymbol[][]) {
     const tracks = new Track()
-    const height = lines.length
-    const width = head(lines)!.length
-    tracks.segments = []
-    for (let y = 0; y < height; y++) {
-      const rowSegments = []
-      const row = lines[y]
 
-      for (let x = 0; x < width; x++) {
-        const symbol = row[x]
-        if (symbol === undefined) throw new Error('Something went wrong')
+    tracks.segments = lines.map((line, y) =>
+      line.map((symbol, x) => {
         const SegmentConstructor = getSegmentConstructor(symbol, x, y, lines)
-        rowSegments.push(new SegmentConstructor(x, y))
-
         if (isCartSymbol(symbol)) tracks.carts.push(new Cart(x, y, symbol))
-      }
+        return new SegmentConstructor(x, y)
+      })
+    )
 
-      tracks.segments.push(rowSegments)
-    }
-
-    for (const cart of tracks.carts) {
-      const segment = tracks.segments[cart.y][cart.x]
-      segment.addCart(cart)
-    }
-
-    return tracks
+    return tracks.registerCarts()
   }
 
   private segments: Segment.Segment[][] = []
@@ -63,6 +48,14 @@ export default class Track {
     }
 
     return this.carts[0]
+  }
+
+  private registerCarts() {
+    for (const cart of this.carts) {
+      const segment = this.segments[cart.y][cart.x]
+      segment.addCart(cart)
+    }
+    return this
   }
 
   private shortTick() {
@@ -112,53 +105,48 @@ function getSegmentConstructor(
 ): new (x: number, y: number) => Segment.Segment {
   const horizontalSymbols = ['>', '<', '-', '+']
   const verticalSymbols = ['|', 'v', '^', '+']
+  const isSymbol = {
+    horizontal: isSymbolFactory(lines, horizontalSymbols),
+    vertical: isSymbolFactory(lines, verticalSymbols),
+  }
 
   if (symbol === '+') return Segment.Intersection
+  if (symbol === ' ') return Segment.Empty
   if (horizontalSymbols.includes(symbol)) return Segment.Horizontal
   if (verticalSymbols.includes(symbol)) return Segment.Vertical
+  if (symbol === '/') return getSENWSegmentConstructor(x, y, isSymbol)
+  if (symbol === '\\') return getSWNESegmentConstructor(x, y, isSymbol)
 
-  switch (symbol) {
-    case ' ':
-      return Segment.Empty
-    case '/':
-      if (
-        Array.isArray(lines[y]) &&
-        horizontalSymbols.includes(lines[y][x - 1]) &&
-        Array.isArray(lines[y - 1]) &&
-        verticalSymbols.includes(lines[y - 1][x])
-      ) {
-        return Segment.SECorner
-      }
-      if (
-        Array.isArray(lines[y]) &&
-        horizontalSymbols.includes(lines[y][x + 1]) &&
-        Array.isArray(lines[y + 1]) &&
-        verticalSymbols.includes(lines[y + 1][x])
-      ) {
-        return Segment.NWCorner
-      }
+  throw new Error('Something went wrong.')
+}
 
-      throw new Error('Something went wrong.')
+interface IIsSymbol {
+  horizontal: (x: number, y: number) => boolean
+  vertical: (x: number, y: number) => boolean
+}
 
-    case '\\':
-      if (
-        Array.isArray(lines[y]) &&
-        horizontalSymbols.includes(lines[y][x + 1]) &&
-        Array.isArray(lines[y - 1]) &&
-        verticalSymbols.includes(lines[y - 1][x])
-      ) {
-        return Segment.SWCorner
-      }
-      if (
-        Array.isArray(lines[y]) &&
-        horizontalSymbols.includes(lines[y][x - 1]) &&
-        Array.isArray(lines[y + 1]) &&
-        verticalSymbols.includes(lines[y + 1][x])
-      ) {
-        return Segment.NECorner
-      }
-      throw new Error('Something went wrong.')
+function getSENWSegmentConstructor(x: number, y: number, isSymbol: IIsSymbol) {
+  if (isSymbol.horizontal(x - 1, y) && isSymbol.vertical(x, y - 1)) {
+    return Segment.SECorner
+  }
+  if (isSymbol.horizontal(x + 1, y) && isSymbol.vertical(x, y + 1)) {
+    return Segment.NWCorner
   }
 
   throw new Error('Something went wrong.')
+}
+
+function getSWNESegmentConstructor(x: number, y: number, isSymbol: IIsSymbol) {
+  if (isSymbol.horizontal(x + 1, y) && isSymbol.vertical(x, y - 1)) {
+    return Segment.SWCorner
+  }
+  if (isSymbol.horizontal(x - 1, y) && isSymbol.vertical(x, y + 1)) {
+    return Segment.NECorner
+  }
+  throw new Error('Something went wrong.')
+}
+
+function isSymbolFactory(lines: SegmentSymbol[][], symbols: string[]) {
+  return (x: number, y: number) =>
+    Array.isArray(lines[y]) && symbols.includes(lines[y][x])
 }

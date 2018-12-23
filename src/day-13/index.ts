@@ -2,15 +2,13 @@ import Track from './Track'
 import { SegmentSymbol } from './types'
 
 export function findFirstCollision(input: string) {
-  const track = inputToTrack(input)
-  const cart = track.findFirstCollision()
-  return { x: cart.x, y: cart.y }
+  const { x, y } = inputToTrack(input).findFirstCollision()
+  return { x, y }
 }
 
 export function findLastCart(input: string) {
-  const track = inputToTrack(input)
-  const cart = track.findLastCart()
-  return { x: cart.x, y: cart.y }
+  const { x, y } = inputToTrack(input).findLastCart()
+  return { x, y }
 }
 
 function inputToTrack(input: string) {
