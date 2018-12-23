@@ -46,11 +46,9 @@ export default class Track {
   }
   public tick() {
     const carts = sortCarts(this.carts)
-    console.log('TICK')
 
     for (const cart of carts) {
       this.moveCart(cart)
-      console.log('this.repr()', this.repr())
     }
 
     return this

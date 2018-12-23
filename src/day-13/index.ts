@@ -6,12 +6,16 @@ export function findFirstCollision(input: string) {
     .split('\n')
     .map(line => line.split('')) as SegmentSymbol[][]
 
+  const track = Track.fromLines(lines)
   try {
-    const track = Track.fromLines(lines)
-    while (true) {
+    let i = 0
+    while (i < 1000) {
       track.tick()
+      i++
     }
   } catch (cart) {
     return { x: cart.x, y: cart.y }
   }
+
+  throw new Error('Something went wrong.')
 }
