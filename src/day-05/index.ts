@@ -1,4 +1,4 @@
-import { LinkedList, Node } from '../utils/LinkedList/v1/LinkedList'
+import { LinkedList, Node } from '../utils/LinkedList/v1'
 
 // PART 1
 export function reducePolymers(input: string) {

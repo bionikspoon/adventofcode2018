@@ -1,5 +1,5 @@
 import { equals, head } from 'ramda'
-import { LinkedList } from '../utils/LinkedList/v1/LinkedList'
+import { LinkedList } from '../utils/LinkedList/v1'
 import parseLines from '../utils/parseLines'
 
 function simulateGenerations(input: string, generations: number) {
