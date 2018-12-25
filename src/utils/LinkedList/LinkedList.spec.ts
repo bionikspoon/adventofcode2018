@@ -1,5 +1,4 @@
 import LinkedList from './LinkedList'
-import LinkedListNode from './LinkedListNode'
 
 describe('#new', () => {
   it('should create empty linked list', () => {
@@ -8,7 +7,23 @@ describe('#new', () => {
   })
 })
 
-describe('#append', () => {
+describe('LinkedList#from', () => {
+  let linkedList: LinkedList<number>
+
+  beforeEach(() => {
+    linkedList = LinkedList.from([1, 1, 2, 3, 3, 3, 4, 5])
+  })
+
+  test('it is a LinkedList', () => {
+    expect(linkedList).toBeInstanceOf(LinkedList)
+  })
+
+  test('it can create a list from array', () => {
+    expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
+  })
+})
+
+describe('#push', () => {
   let linkedList: LinkedList<number>
 
   beforeEach(() => {
@@ -25,10 +40,10 @@ describe('#append', () => {
     })
   })
 
-  describe('after appending', () => {
+  describe('after pushing', () => {
     beforeEach(() => {
-      linkedList.append(1)
-      linkedList.append(2)
+      linkedList.push(1)
+      linkedList.push(2)
     })
 
     test("it's string repr shows each value", () => {
@@ -36,94 +51,36 @@ describe('#append', () => {
     })
 
     test("it's nodes are linked correctly", () => {
-      expect(linkedList.tail!.next).toBeNull()
+      expect(linkedList.tailNode!.next).toBeNull()
     })
   })
 })
 
-describe('#prepend', () => {
-  it('should prepend node to linked list', () => {
-    const linkedList = new LinkedList()
-
-    linkedList.prepend(2)
-    expect(linkedList.head!.toString()).toBe('2')
-    expect(linkedList.tail!.toString()).toBe('2')
-
-    linkedList.append(1)
-    linkedList.prepend(3)
-
-    expect(linkedList.toString()).toBe('3,2,1')
-  })
-})
-
-describe.skip('deleting nodes', () => {
+describe('#unshift', () => {
   let linkedList: LinkedList<number>
 
-  beforeAll(() => {
-    linkedList = new LinkedList()
-  })
-
   describe('initial state', () => {
-    test('it returns null if deleting an unknown value', () => {
-      expect(linkedList.delete(5)).toBeNull()
-    })
-  })
-
-  describe('after adding values', () => {
     beforeAll(() => {
-      linkedList.append(1)
-      linkedList.append(1)
-      linkedList.append(2)
-      linkedList.append(3)
-      linkedList.append(3)
-      linkedList.append(3)
-      linkedList.append(4)
-      linkedList.append(5)
+      linkedList = new LinkedList<number>()
+      linkedList.unshift(2)
     })
 
-    test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
+    test('it sets head', () => {
+      expect(linkedList).toHaveProperty('head', 2)
+    })
+    test('it sets tail', () => {
+      expect(linkedList).toHaveProperty('tail', 2)
     })
   })
 
-  describe('deleting a value', () => {
-    let deletedNode: LinkedListNode<number> | null
-
-    beforeAll(() => (deletedNode = linkedList.delete(3)))
-    test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('1,1,2,4,5')
+  describe('after push and unshift', () => {
+    beforeAll(() => {
+      linkedList.push(1)
+      linkedList.unshift(3)
     })
 
-    test('it returns the deleted node', () => {
-      expect(deletedNode).toHaveProperty('value', 3)
-    })
-  })
-
-  describe('deleting a value: 1', () => {
-    beforeAll(() => linkedList.delete(1))
     test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('2,4,5')
-    })
-  })
-
-  describe('deleting a value: 5', () => {
-    beforeAll(() => linkedList.delete(5))
-    test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('2,4')
-    })
-  })
-
-  describe('deleting a value: 4', () => {
-    beforeAll(() => linkedList.delete(4))
-    test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('2')
-    })
-  })
-
-  describe('deleting a value: 2', () => {
-    beforeAll(() => linkedList.delete(2))
-    test('it has the correct values', () => {
-      expect(linkedList.toString()).toBe('')
+      expect(linkedList.toString()).toBe('3,2,1')
     })
   })
 })
@@ -133,9 +90,9 @@ describe('#shift', () => {
 
   beforeAll(() => {
     linkedList = new LinkedList<number>()
-      .append(1)
-      .append(2)
-      .append(3)
+      .push(1)
+      .push(2)
+      .push(3)
   })
 
   describe('initial state', () => {
@@ -160,11 +117,11 @@ describe('#shift', () => {
     })
 
     test('it should have a new head', () => {
-      expect(linkedList.head!.toString()).toBe('2')
+      expect(linkedList).toHaveProperty('head', 2)
     })
 
     test('it should have the old tail', () => {
-      expect(linkedList.tail!.toString()).toBe('3')
+      expect(linkedList).toHaveProperty('tail', 3)
     })
   })
 
@@ -184,11 +141,11 @@ describe('#shift', () => {
     })
 
     test('it should have a new head', () => {
-      expect(linkedList.head!.toString()).toBe('3')
+      expect(linkedList).toHaveProperty('head', 3)
     })
 
     test('it should have the old tail', () => {
-      expect(linkedList.tail!.toString()).toBe('3')
+      expect(linkedList).toHaveProperty('tail', 3)
     })
   })
 
@@ -222,9 +179,9 @@ describe('#pop', () => {
 
   beforeAll(() => {
     linkedList = new LinkedList<number>()
-      .append(1)
-      .append(2)
-      .append(3)
+      .push(1)
+      .push(2)
+      .push(3)
   })
 
   describe('initial state', () => {
@@ -249,11 +206,11 @@ describe('#pop', () => {
     })
 
     test('it should have the old head', () => {
-      expect(linkedList.head!.toString()).toBe('1')
+      expect(linkedList).toHaveProperty('head', 1)
     })
 
     test('it should have a new tail', () => {
-      expect(linkedList.tail!.toString()).toBe('2')
+      expect(linkedList).toHaveProperty('tail', 2)
     })
   })
 
@@ -273,11 +230,11 @@ describe('#pop', () => {
     })
 
     test('it should have the old head', () => {
-      expect(linkedList.head!.toString()).toBe('1')
+      expect(linkedList).toHaveProperty('head', 1)
     })
 
     test('it should have a new tail', () => {
-      expect(linkedList.tail!.toString()).toBe('1')
+      expect(linkedList).toHaveProperty('tail', 1)
     })
   })
 
@@ -311,8 +268,8 @@ describe('#toString', () => {
     const nodeValue1 = { value: 1, key: 'key1' }
     const nodeValue2 = { value: 2, key: 'key2' }
     const linkedList = new LinkedList<typeof nodeValue1>()
-      .append(nodeValue1)
-      .prepend(nodeValue2)
+      .push(nodeValue1)
+      .unshift(nodeValue2)
 
     const nodeStringifier = (value: typeof nodeValue1) =>
       `${value.key}:${value.value}`
@@ -330,9 +287,9 @@ describe('#find', () => {
 
   beforeEach(() => {
     linkedList = new LinkedList<ITestObject>()
-      .append({ value: 1, key: 'test1' })
-      .append({ value: 2, key: 'test2' })
-      .append({ value: 3, key: 'test3' })
+      .push({ value: 1, key: 'test1' })
+      .push({ value: 2, key: 'test2' })
+      .push({ value: 3, key: 'test3' })
   })
 
   test('it finds a value', () => {
@@ -356,9 +313,9 @@ describe('#findNode', () => {
 
   beforeEach(() => {
     linkedList = new LinkedList<ITestObject>()
-      .append({ value: 1, key: 'test1' })
-      .append({ value: 2, key: 'test2' })
-      .append({ value: 3, key: 'test3' })
+      .push({ value: 1, key: 'test1' })
+      .push({ value: 2, key: 'test2' })
+      .push({ value: 3, key: 'test3' })
   })
 
   test('it finds a value', () => {
@@ -375,30 +332,86 @@ describe('#findNode', () => {
   })
 })
 
-describe('LinkedList#from', () => {
-  let linkedList: LinkedList<number>
+// describe.skip('deleting nodes', () => {
+//   let linkedList: LinkedList<number>
 
-  beforeEach(() => {
-    linkedList = LinkedList.from([1, 1, 2, 3, 3, 3, 4, 5])
-  })
+//   beforeAll(() => {
+//     linkedList = new LinkedList()
+//   })
 
-  test('it is a LinkedList', () => {
-    expect(linkedList).toBeInstanceOf(LinkedList)
-  })
+//   describe('initial state', () => {
+//     test('it returns null if deleting an unknown value', () => {
+//       expect(linkedList.delete(5)).toBeNull()
+//     })
+//   })
 
-  test('it can create a list from array', () => {
-    expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
-  })
-})
+//   describe('after adding values', () => {
+//     beforeAll(() => {
+//       linkedList.push(1)
+//       linkedList.push(1)
+//       linkedList.push(2)
+//       linkedList.push(3)
+//       linkedList.push(3)
+//       linkedList.push(3)
+//       linkedList.push(4)
+//       linkedList.push(5)
+//     })
+
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
+//     })
+//   })
+
+//   describe('deleting a value', () => {
+//     let deletedNode: LinkedListNode<number> | null
+
+//     beforeAll(() => (deletedNode = linkedList.delete(3)))
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('1,1,2,4,5')
+//     })
+
+//     test('it returns the deleted node', () => {
+//       expect(deletedNode).toHaveProperty('value', 3)
+//     })
+//   })
+
+//   describe('deleting a value: 1', () => {
+//     beforeAll(() => linkedList.delete(1))
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('2,4,5')
+//     })
+//   })
+
+//   describe('deleting a value: 5', () => {
+//     beforeAll(() => linkedList.delete(5))
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('2,4')
+//     })
+//   })
+
+//   describe('deleting a value: 4', () => {
+//     beforeAll(() => linkedList.delete(4))
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('2')
+//     })
+//   })
+
+//   describe('deleting a value: 2', () => {
+//     beforeAll(() => linkedList.delete(2))
+//     test('it has the correct values', () => {
+//       expect(linkedList.toString()).toBe('')
+//     })
+//   })
+// })
 
 describe('#reverse', () => {
   let linkedList: LinkedList<number>
 
   beforeAll(() => {
     linkedList = new LinkedList<number>()
-      .append(1)
-      .append(2)
-      .append(3)
+      .push(1)
+      .push(2)
+      .push(3)
   })
 
   describe('initial state', () => {
@@ -406,10 +419,10 @@ describe('#reverse', () => {
       expect(linkedList.toString()).toBe('1,2,3')
     })
     test('it has the correct head', () => {
-      expect(linkedList.head!.value).toBe(1)
+      expect(linkedList).toHaveProperty('head', 1)
     })
     test('it has the correct tail', () => {
-      expect(linkedList.tail!.value).toBe(3)
+      expect(linkedList).toHaveProperty('tail', 3)
     })
   })
 
@@ -420,10 +433,10 @@ describe('#reverse', () => {
       expect(linkedList.toString()).toBe('3,2,1')
     })
     test('it has the correct head', () => {
-      expect(linkedList.head!.value).toBe(3)
+      expect(linkedList).toHaveProperty('head', 3)
     })
     test('it has the correct tail', () => {
-      expect(linkedList.tail!.value).toBe(1)
+      expect(linkedList).toHaveProperty('tail', 1)
     })
   })
 
@@ -434,10 +447,10 @@ describe('#reverse', () => {
       expect(linkedList.toString()).toBe('1,2,3')
     })
     test('it has the correct head', () => {
-      expect(linkedList.head!.value).toBe(1)
+      expect(linkedList).toHaveProperty('head', 1)
     })
     test('it has the correct tail', () => {
-      expect(linkedList.tail!.value).toBe(3)
+      expect(linkedList).toHaveProperty('tail', 3)
     })
   })
 })

@@ -2,60 +2,64 @@ import LinkedListNode from './LinkedListNode'
 
 export default class LinkedList<T> {
   public static from<T>(items: T[]) {
-    return items.reduce((list, item) => list.append(item), new LinkedList<T>())
+    return items.reduce((list, item) => list.push(item), new LinkedList<T>())
   }
-  public head: LinkedListNode<T> | null = null
-  public tail: LinkedListNode<T> | null = null
+  public headNode: LinkedListNode<T> | null = null
+  public tailNode: LinkedListNode<T> | null = null
 
-  public append(value: T) {
+  public get head() {
+    return this.headNode === null ? null : this.headNode.value
+  }
+  public get tail() {
+    return this.tailNode === null ? null : this.tailNode.value
+  }
+
+  public push(value: T) {
     const node = new LinkedListNode(value)
-    if (this.head === null) {
-      this.head = node
-      this.tail = node
+    if (this.headNode === null) {
+      this.headNode = node
+      this.tailNode = node
       return this
     }
 
-    this.tail!.next = node
-    this.tail = node
+    this.tailNode!.next = node
+    this.tailNode = node
 
     return this
   }
 
-  public prepend(value: T) {
-    const node = new LinkedListNode(value, this.head)
-    this.head = node
+  public unshift(value: T) {
+    const node = new LinkedListNode(value, this.headNode)
+    this.headNode = node
 
-    if (!this.tail) this.tail = node
+    if (!this.tailNode) this.tailNode = node
 
     return this
-  }
-  public delete(value: T) {
-    return null
   }
 
   public shift() {
-    if (this.head === null) return null
+    if (this.headNode === null) return null
 
-    const deletedNode = this.head
-    this.head = this.head.next
+    const deletedNode = this.headNode
+    this.headNode = this.headNode.next
 
-    if (this.tail === deletedNode) this.tail = null
+    if (this.tailNode === deletedNode) this.tailNode = null
 
     return deletedNode.value
   }
 
   public pop() {
-    if (this.head === null) return null
-    if (this.tail === this.head) return this.shift()
+    if (this.headNode === null) return null
+    if (this.tailNode === this.headNode) return this.shift()
 
-    const deletedNode = this.tail
+    const deletedNode = this.tailNode
 
-    let currentNode = this.head
+    let currentNode = this.headNode
 
     while (currentNode) {
       if (currentNode.next === deletedNode) {
         currentNode.next = null
-        this.tail = currentNode
+        this.tailNode = currentNode
         break
       }
       currentNode = currentNode.next!
@@ -65,7 +69,7 @@ export default class LinkedList<T> {
   }
 
   public find(predicate: (item: T) => boolean) {
-    let currentNode = this.head
+    let currentNode = this.headNode
 
     while (currentNode) {
       if (predicate(currentNode.value)) return currentNode.value
@@ -76,7 +80,7 @@ export default class LinkedList<T> {
     return null
   }
   public findNode(predicate: (item: LinkedListNode<T>) => boolean) {
-    let currentNode = this.head
+    let currentNode = this.headNode
 
     while (currentNode) {
       if (predicate(currentNode)) return currentNode
@@ -88,7 +92,7 @@ export default class LinkedList<T> {
   }
 
   public reverse() {
-    let currNode = this.head
+    let currNode = this.headNode
     let prevNode = null
     let nextNode = null
 
@@ -101,8 +105,8 @@ export default class LinkedList<T> {
       currNode = nextNode
     }
 
-    this.tail = this.head
-    this.head = prevNode
+    this.tailNode = this.headNode
+    this.headNode = prevNode
 
     return this
   }
@@ -115,7 +119,7 @@ export default class LinkedList<T> {
 
   private toNodeArray() {
     const nodes = []
-    let currentNode = this.head
+    let currentNode = this.headNode
     while (currentNode) {
       nodes.push(currentNode)
       currentNode = currentNode.next
