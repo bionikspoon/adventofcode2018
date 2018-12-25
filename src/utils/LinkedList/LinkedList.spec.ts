@@ -332,7 +332,7 @@ describe('#findNode', () => {
   })
 })
 
-describe('#filter', () => {
+describe('#deleteWhere', () => {
   let linkedList: LinkedList<number>
 
   describe('initial state', () => {
@@ -355,7 +355,7 @@ describe('#filter', () => {
 
   describe('after removing a value: 3', () => {
     beforeAll(() => {
-      linkedList.filter(value => value !== 3)
+      linkedList.deleteWhere(value => value === 3)
     })
     test('it has the correct values', () => {
       expect(linkedList.toString()).toBe('1,1,2,4,5')
@@ -372,7 +372,7 @@ describe('#filter', () => {
 
   describe('after removing a value: 1', () => {
     beforeAll(() => {
-      linkedList.filter(value => value !== 1)
+      linkedList.deleteWhere(value => value === 1)
     })
 
     test('it has the correct values', () => {
@@ -390,7 +390,7 @@ describe('#filter', () => {
 
   describe('after removing a value: 5', () => {
     beforeAll(() => {
-      linkedList.filter(value => value !== 5)
+      linkedList.deleteWhere(value => value === 5)
     })
 
     test('it has the correct values', () => {
@@ -408,7 +408,7 @@ describe('#filter', () => {
 
   describe('after removing the rest', () => {
     beforeAll(() => {
-      linkedList.filter(() => false)
+      linkedList.deleteWhere(() => true)
     })
 
     test('it has the correct values', () => {
@@ -514,5 +514,60 @@ describe('#reverse', () => {
     test('it has the correct tail', () => {
       expect(linkedList).toHaveProperty('tail', 3)
     })
+  })
+})
+
+describe('#clear', () => {
+  let linkedList: LinkedList<number>
+
+  describe('initial state', () => {
+    beforeAll(() => {
+      linkedList = LinkedList.from([1, 2, 3])
+    })
+    test('it has the correct values', () => {
+      expect(linkedList.toArray()).toEqual([1, 2, 3])
+    })
+  })
+
+  describe('after clearing', () => {
+    beforeAll(() => {
+      linkedList.clear()
+    })
+
+    test('it is empty', () => {
+      expect(linkedList.toArray()).toEqual([])
+    })
+    test.each`
+      prop      | value
+      ${'head'} | ${null}
+      ${'tail'} | ${null}
+    `('it has prop $prop with value $value', ({ prop, value }) => {
+      expect(linkedList).toHaveProperty(prop, value)
+    })
+  })
+})
+
+describe('#includes', () => {
+  test('it is true when the value exists', () => {
+    const linkedList = LinkedList.from([1, 2, 3])
+
+    expect(linkedList.includes(2)).toBeTruthy()
+  })
+  test('it is false when the value is missing', () => {
+    const linkedList = LinkedList.from([1, 2, 3])
+
+    expect(linkedList.includes(5)).toBeFalsy()
+  })
+})
+
+describe('#length', () => {
+  test('it has length 0', () => {
+    const linkedList = new LinkedList()
+    expect(linkedList).toHaveLength(0)
+  })
+
+  test('it has length equal to the number of items', () => {
+    const linkedList = LinkedList.from([1, 2, 2, 2, 2, 2])
+    expect(linkedList).toHaveLength(6)
   })
 })

@@ -92,14 +92,17 @@ export default class Graph<T> {
       .map(() => Array(vertices.length).fill(Infinity))
 
     vertices.forEach((vertex, vertexIndex) => {
-      vertex.getNeighbors().forEach(neighbor => {
-        const neighborIndex = verticesIndices[neighbor.getKey()]
+      vertex
+        .getNeighbors()
+        .toArray()
+        .forEach(neighbor => {
+          const neighborIndex = verticesIndices[neighbor.getKey()]
 
-        adjacencyMatrix[vertexIndex][neighborIndex] = this.findEdge(
-          vertex,
-          neighbor
-        )!.weight
-      })
+          adjacencyMatrix[vertexIndex][neighborIndex] = this.findEdge(
+            vertex,
+            neighbor
+          )!.weight
+        })
     })
 
     return adjacencyMatrix

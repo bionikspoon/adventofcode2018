@@ -81,11 +81,11 @@ describe('given an undirected graph', () => {
 
   describe('GraphVertex#getNeighbors', () => {
     test('it has neighbors set', () => {
-      expect(vertexA.getNeighbors()).toEqual([vertexB])
+      expect(vertexA.getNeighbors().toArray()).toEqual([vertexB])
     })
 
     test('it has neighbors set', () => {
-      expect(vertexB.getNeighbors()).toEqual([vertexA])
+      expect(vertexB.getNeighbors().toArray()).toEqual([vertexA])
     })
   })
 })
@@ -116,10 +116,10 @@ describe('given a directed graph', () => {
 
   describe('given graphVertexA', () => {
     test('it still has a neighbor', () => {
-      expect(graphVertexA.getNeighbors()).toEqual([vertexB])
+      expect(graphVertexA.getNeighbors().toArray()).toEqual([vertexB])
     })
     test('it still has a neighbor', () => {
-      expect(graphVertexA.getNeighbors()).toEqual([graphVertexB])
+      expect(graphVertexA.getNeighbors().toArray()).toEqual([graphVertexB])
     })
   })
 
@@ -226,7 +226,7 @@ describe('given an undirected graph', () => {
   })
 
   test('it can find vertex neighbors', () => {
-    expect(graph.getNeighbors(vertexA)).toEqual([vertexB, vertexC])
+    expect(graph.getNeighbors(vertexA).toArray()).toEqual([vertexB, vertexC])
   })
 })
 

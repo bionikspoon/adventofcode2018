@@ -1,4 +1,5 @@
 import { GraphEdge, GraphVertex } from '.'
+import LinkedList from '../LinkedList'
 
 describe('given a vertex', () => {
   let subject: GraphVertex<string>
@@ -208,11 +209,11 @@ describe('getting neighbors', () => {
   })
 
   test('vertexB.getNeighbors()', () => {
-    expect(vertexB.getNeighbors()).toEqual([])
+    expect(vertexB.getNeighbors().toArray()).toEqual([])
   })
 
   describe('given vertexA neighbors', () => {
-    let neighbors: Array<GraphVertex<string>>
+    let neighbors: LinkedList<GraphVertex<string>>
 
     beforeAll(() => {
       neighbors = vertexA.getNeighbors()
@@ -222,7 +223,7 @@ describe('getting neighbors', () => {
       expect(neighbors).toHaveLength(2)
     })
     test('it has neighbors', () => {
-      expect(neighbors).toEqual([vertexB, vertexC])
+      expect(neighbors.toArray()).toEqual([vertexB, vertexC])
     })
   })
 

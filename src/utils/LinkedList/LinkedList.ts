@@ -14,6 +14,17 @@ export default class LinkedList<T> {
     return this.tailNode === null ? null : this.tailNode.value
   }
 
+  public get length() {
+    let i = 0
+    let currentNode = this.headNode
+    while (currentNode) {
+      i++
+      currentNode = currentNode.next
+    }
+
+    return i
+  }
+
   public push(value: T) {
     const node = new LinkedListNode(value)
     if (this.headNode === null) {
@@ -91,12 +102,12 @@ export default class LinkedList<T> {
     return null
   }
 
-  public filter(pred: (value: T) => boolean) {
+  public deleteWhere(pred: (value: T) => boolean) {
     let prevNode: LinkedListNode<T> | null = null
     let currNode: LinkedListNode<T> | null = this.headNode
 
     while (currNode) {
-      if (pred(currNode.value)) {
+      if (!pred(currNode.value)) {
         prevNode = currNode
         currNode = currNode.next
         continue
@@ -145,6 +156,24 @@ export default class LinkedList<T> {
 
     this.tailNode = this.headNode
     this.headNode = prevNode
+
+    return this
+  }
+
+  public includes(value: T) {
+    let currentNode = this.headNode
+
+    while (currentNode) {
+      if (currentNode.value === value) return true
+      currentNode = currentNode.next!
+    }
+
+    return false
+  }
+
+  public clear() {
+    this.headNode = null
+    this.tailNode = null
 
     return this
   }

@@ -1,8 +1,9 @@
+import LinkedList from '../LinkedList'
 import GraphEdge from './GraphEdge'
 
 export default class GraphVertex<T> {
   private readonly value: T
-  private edges: Array<GraphEdge<T>> = []
+  private edges: LinkedList<GraphEdge<T>> = new LinkedList()
   constructor(value: T) {
     this.value = value
   }
@@ -16,7 +17,7 @@ export default class GraphVertex<T> {
   }
 
   public getEdges() {
-    return this.edges
+    return this.edges.toArray()
   }
 
   public addEdge(edge: GraphEdge<T>) {
@@ -29,7 +30,7 @@ export default class GraphVertex<T> {
   }
 
   public deleteEdge(edge: GraphEdge<T>) {
-    this.edges = this.edges.filter(e => e !== edge)
+    this.edges.deleteWhere(e => e === edge)
     return this
   }
 
@@ -41,11 +42,11 @@ export default class GraphVertex<T> {
   }
 
   public deleteAllEdges() {
-    this.edges = []
+    this.edges.clear()
     return this
   }
 
-  public getNeighbors() {
+  public getNeighbors(): LinkedList<GraphVertex<T>> {
     return this.edges.map(node =>
       node.startVertex === this ? node.endVertex : node.startVertex
     )
