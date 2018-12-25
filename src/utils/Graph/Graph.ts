@@ -87,7 +87,7 @@ export default class Graph<T> {
   public getAdjacencyMatrix() {
     const vertices = this.getAllVertices()
     const verticesIndices = this.getVerticesIndices()
-    const adjacencyMatrix = Array(vertices.length)
+    const adjacencyMatrix: number[][] = Array(vertices.length)
       .fill(null)
       .map(() => Array(vertices.length).fill(Infinity))
 
@@ -98,7 +98,7 @@ export default class Graph<T> {
         adjacencyMatrix[vertexIndex][neighborIndex] = this.findEdge(
           vertex,
           neighbor
-        ).weight
+        )!.weight
       })
     })
 

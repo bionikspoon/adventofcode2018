@@ -34,11 +34,10 @@ export default class GraphVertex<T> {
   }
 
   public findEdge(vertex: GraphVertex<T>) {
-    return (
-      this.edges.find(
-        edge => edge.startVertex === vertex || edge.endVertex === vertex
-      ) || null
+    const edge = this.edges.find(
+      e => e.startVertex === vertex || e.endVertex === vertex
     )
+    return edge || null
   }
 
   public deleteAllEdges() {
