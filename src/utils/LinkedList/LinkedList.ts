@@ -91,6 +91,44 @@ export default class LinkedList<T> {
     return null
   }
 
+  public filter(pred: (value: T) => boolean) {
+    let prevNode: LinkedListNode<T> | null = null
+    let currNode: LinkedListNode<T> | null = this.headNode
+
+    while (currNode) {
+      if (pred(currNode.value)) {
+        prevNode = currNode
+        currNode = currNode.next
+        continue
+      }
+
+      if (prevNode === null) {
+        this.shift()
+        currNode = this.headNode
+      } else if (currNode === this.tailNode) {
+        this.pop()
+        currNode = prevNode.next
+      } else {
+        prevNode.next = currNode.next
+        currNode = prevNode.next
+      }
+    }
+
+    return this
+  }
+
+  public map<U>(fn: (item: T) => U) {
+    const newList = new LinkedList<U>()
+
+    let currentNode = this.headNode
+
+    while (currentNode) {
+      newList.push(fn(currentNode.value))
+      currentNode = currentNode.next!
+    }
+    return newList
+  }
+
   public reverse() {
     let currNode = this.headNode
     let prevNode = null
@@ -115,6 +153,10 @@ export default class LinkedList<T> {
     return this.toNodeArray()
       .map(node => node.toString(callback))
       .toString()
+  }
+
+  public toArray() {
+    return this.toNodeArray().map(node => node.value)
   }
 
   private toNodeArray() {

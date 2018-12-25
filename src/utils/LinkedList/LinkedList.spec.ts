@@ -332,77 +332,139 @@ describe('#findNode', () => {
   })
 })
 
-// describe.skip('deleting nodes', () => {
-//   let linkedList: LinkedList<number>
+describe('#filter', () => {
+  let linkedList: LinkedList<number>
 
-//   beforeAll(() => {
-//     linkedList = new LinkedList()
-//   })
+  describe('initial state', () => {
+    beforeAll(() => {
+      linkedList = new LinkedList<number>()
+        .push(1)
+        .push(1)
+        .push(2)
+        .push(3)
+        .push(3)
+        .push(3)
+        .push(4)
+        .push(5)
+    })
 
-//   describe('initial state', () => {
-//     test('it returns null if deleting an unknown value', () => {
-//       expect(linkedList.delete(5)).toBeNull()
-//     })
-//   })
+    test('it has the correct values', () => {
+      expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
+    })
+  })
 
-//   describe('after adding values', () => {
-//     beforeAll(() => {
-//       linkedList.push(1)
-//       linkedList.push(1)
-//       linkedList.push(2)
-//       linkedList.push(3)
-//       linkedList.push(3)
-//       linkedList.push(3)
-//       linkedList.push(4)
-//       linkedList.push(5)
-//     })
+  describe('after removing a value: 3', () => {
+    beforeAll(() => {
+      linkedList.filter(value => value !== 3)
+    })
+    test('it has the correct values', () => {
+      expect(linkedList.toString()).toBe('1,1,2,4,5')
+    })
 
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('1,1,2,3,3,3,4,5')
-//     })
-//   })
+    test.each`
+      prop      | value
+      ${'head'} | ${1}
+      ${'tail'} | ${5}
+    `('it has prop $prop with value $value', ({ prop, value }) => {
+      expect(linkedList).toHaveProperty(prop, value)
+    })
+  })
 
-//   describe('deleting a value', () => {
-//     let deletedNode: LinkedListNode<number> | null
+  describe('after removing a value: 1', () => {
+    beforeAll(() => {
+      linkedList.filter(value => value !== 1)
+    })
 
-//     beforeAll(() => (deletedNode = linkedList.delete(3)))
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('1,1,2,4,5')
-//     })
+    test('it has the correct values', () => {
+      expect(linkedList.toString()).toBe('2,4,5')
+    })
 
-//     test('it returns the deleted node', () => {
-//       expect(deletedNode).toHaveProperty('value', 3)
-//     })
-//   })
+    test.each`
+      prop      | value
+      ${'head'} | ${2}
+      ${'tail'} | ${5}
+    `('it has prop $prop with value $value', ({ prop, value }) => {
+      expect(linkedList).toHaveProperty(prop, value)
+    })
+  })
 
-//   describe('deleting a value: 1', () => {
-//     beforeAll(() => linkedList.delete(1))
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('2,4,5')
-//     })
-//   })
+  describe('after removing a value: 5', () => {
+    beforeAll(() => {
+      linkedList.filter(value => value !== 5)
+    })
 
-//   describe('deleting a value: 5', () => {
-//     beforeAll(() => linkedList.delete(5))
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('2,4')
-//     })
-//   })
+    test('it has the correct values', () => {
+      expect(linkedList.toString()).toBe('2,4')
+    })
 
-//   describe('deleting a value: 4', () => {
-//     beforeAll(() => linkedList.delete(4))
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('2')
-//     })
-//   })
+    test.each`
+      prop      | value
+      ${'head'} | ${2}
+      ${'tail'} | ${4}
+    `('it has prop $prop with value $value', ({ prop, value }) => {
+      expect(linkedList).toHaveProperty(prop, value)
+    })
+  })
 
-//   describe('deleting a value: 2', () => {
-//     beforeAll(() => linkedList.delete(2))
-//     test('it has the correct values', () => {
-//       expect(linkedList.toString()).toBe('')
-//     })
-//   })
-// })
+  describe('after removing the rest', () => {
+    beforeAll(() => {
+      linkedList.filter(() => false)
+    })
+
+    test('it has the correct values', () => {
+      expect(linkedList.toString()).toBe('')
+    })
+
+    test.each`
+      prop      | value
+      ${'head'} | ${null}
+      ${'tail'} | ${null}
+    `('it has prop $prop with value $value', ({ prop, value }) => {
+      expect(linkedList).toHaveProperty(prop, value)
+    })
+  })
+})
+
+describe('#map', () => {
+  let linkedListNumber: LinkedList<number>
+  let linkedListString: LinkedList<string>
+
+  describe('initial state', () => {
+    beforeAll(() => {
+      linkedListNumber = new LinkedList<number>()
+        .push(1)
+        .push(1)
+        .push(2)
+        .push(3)
+        .push(3)
+        .push(3)
+        .push(4)
+        .push(5)
+    })
+
+    test('it has the correct values', () => {
+      expect(linkedListNumber.toArray()).toEqual([1, 1, 2, 3, 3, 3, 4, 5])
+    })
+  })
+
+  describe('after mapping over the list', () => {
+    beforeAll(() => {
+      linkedListString = linkedListNumber.map(value => value.toString())
+    })
+    test('it has new values', () => {
+      expect(linkedListString.toArray()).toEqual([
+        '1',
+        '1',
+        '2',
+        '3',
+        '3',
+        '3',
+        '4',
+        '5',
+      ])
+    })
+  })
+})
 
 describe('#reverse', () => {
   let linkedList: LinkedList<number>
