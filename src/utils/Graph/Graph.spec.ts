@@ -1,6 +1,4 @@
-import Graph from './Graph'
-import GraphVertex from './GraphVertex'
-import GraphEdge from './GraphEdge'
+import { Graph, GraphEdge, GraphVertex } from '.'
 
 describe('adding vertices', () => {
   let graph: Graph<string>

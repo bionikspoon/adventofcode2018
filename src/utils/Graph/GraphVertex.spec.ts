@@ -1,5 +1,4 @@
-import GraphVertex from './GraphVertex'
-import GraphEdge from './GraphEdge'
+import { GraphEdge, GraphVertex } from '.'
 
 describe('given a vertex', () => {
   let subject: GraphVertex<string>
