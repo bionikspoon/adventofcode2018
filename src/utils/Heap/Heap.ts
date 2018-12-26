@@ -1,7 +1,7 @@
 import Comparator from '../Comparator'
 
 export default abstract class Heap<T> {
-  protected readonly compare: Comparator<T>
+  protected compare: Comparator<T>
   private heapContainer: T[] = []
 
   constructor(readonly comparatorFn?: Comparator<T>['compare']) {
