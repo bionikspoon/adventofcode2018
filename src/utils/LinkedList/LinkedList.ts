@@ -140,6 +140,16 @@ export default class LinkedList<T> {
     return newList
   }
 
+  public forEach(fn: (item: T) => void) {
+    let currentNode = this.headNode
+
+    while (currentNode) {
+      fn(currentNode.value)
+      currentNode = currentNode.next!
+    }
+
+    return this
+  }
   public reverse() {
     let currNode = this.headNode
     let prevNode = null

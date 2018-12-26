@@ -517,6 +517,19 @@ describe('#reverse', () => {
   })
 })
 
+describe('#forEach', () => {
+  test('it calls the callback for each item', () => {
+    const spy = jest.fn()
+    const linkedList = LinkedList.from([1, 2, 3])
+
+    linkedList.forEach(spy)
+
+    expect(spy).toHaveBeenNthCalledWith(1, 1)
+    expect(spy).toHaveBeenNthCalledWith(2, 2)
+    expect(spy).toHaveBeenNthCalledWith(3, 3)
+  })
+})
+
 describe('#clear', () => {
   let linkedList: LinkedList<number>
 
