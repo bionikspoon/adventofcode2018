@@ -1,5 +1,12 @@
+import Comparator from '../Comparator'
+
 export default abstract class Heap<T> {
+  protected readonly compare: Comparator<T>
   private heapContainer: T[] = []
+
+  constructor(readonly comparatorFn?: Comparator<T>['compare']) {
+    this.compare = new Comparator<T>(comparatorFn)
+  }
 
   public isEmpty() {
     return !this.heapContainer.length
@@ -24,13 +31,13 @@ export default abstract class Heap<T> {
     return this.heapContainer[0] || null
   }
 
-  public find(value: T) {
+  public find(value: T, comparator = this.compare) {
     const hits: number[] = []
 
     for (let i = 0; i < this.heapContainer.length; i++) {
       const potentialHit = this.heapContainer[i]
 
-      if (potentialHit === value) hits.push(i)
+      if (comparator.equal(potentialHit, value)) hits.push(i)
     }
 
     return hits
@@ -43,11 +50,11 @@ export default abstract class Heap<T> {
     return this
   }
 
-  public remove(value: T) {
-    const numberOfItemsToRemove = this.find(value).length
+  public remove(value: T, comparator = this.compare) {
+    const numberOfItemsToRemove = this.find(value, comparator).length
 
     for (let i = 0; i < numberOfItemsToRemove; i++) {
-      const indexToRemove = this.find(value).pop()!
+      const indexToRemove = this.find(value, comparator).pop()!
 
       if (indexToRemove === this.heapContainer.length - 1) {
         this.heapContainer.pop()

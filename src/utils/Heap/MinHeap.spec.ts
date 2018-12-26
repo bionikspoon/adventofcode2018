@@ -1,4 +1,5 @@
 import { MinHeap } from '.'
+import Comparator from '../Comparator'
 
 describe('#new', () => {
   let minHeap: MinHeap<any>
@@ -350,5 +351,32 @@ describe('#remove with heapify up', () => {
   })
   test('it removes the value: 4', () => {
     expect(minHeap.remove(4).toString()).toEqual('')
+  })
+})
+
+describe('removing with a custom comparator', () => {
+  let minHeap: MinHeap<string>
+  let comparator: Comparator<string>
+
+  beforeAll(() => {
+    minHeap = new MinHeap<string>()
+      .add('dddd')
+      .add('ccc')
+      .add('bb')
+      .add('a')
+
+    comparator = new Comparator<string>((a, b) => {
+      if (a.length === b.length) return 0
+
+      return a.length < b.length ? -1 : 1
+    })
+  })
+
+  test('it has the initial values', () => {
+    expect(minHeap.toString()).toBe('a,bb,ccc,dddd')
+  })
+
+  test('it removes the value: 8', () => {
+    expect(minHeap.remove('hey', comparator).toString()).toEqual('a,bb,dddd')
   })
 })
