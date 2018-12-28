@@ -12,28 +12,6 @@ enum Direction {
   W,
 }
 
-const dijkstraOptions: IDijkstraOptions<Cell> = {
-  queueCompareFn(this, l, r) {
-    const lKey = l.toString()
-    const rKey = r.toString()
-    const lPriority = this.priorities[lKey]
-    const rPriority = this.priorities[rKey]
-
-    if (lPriority === rPriority) {
-      if (lKey === rKey) {
-        return 0
-      } else {
-        return lKey < rKey ? -1 : 1
-      }
-    }
-
-    return lPriority < rPriority ? -1 : 1
-  },
-  canTraverse(neighbor) {
-    return neighbor.value.piece instanceof EmptyPiece
-  },
-}
-
 export function playRoundsRepr(input: string, rounds: number) {
   const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
 
@@ -45,16 +23,16 @@ export function playRoundsRepr(input: string, rounds: number) {
     players.forEach(player => {
       const playerKey = player.getKey()
       const vertex = board.getVertexByKey(playerKey)
-      const enemies = players.filter(p => p.token !== player.token)
+      const enemies = players.filter(player.isEnemy.bind(player))
 
-      const neighborEnemies = vertex
+      const adjacentEnemies = vertex
         .getNeighbors()
         .toArray()
         .map(v => v.value.piece)
-        .filter((piece): piece is Player => piece instanceof Player)
+        .filter((piece): piece is Player => piece.isPlayer())
         .filter(p => enemies.includes(p))
 
-      if (neighborEnemies.length) return
+      if (adjacentEnemies.length) return
 
       const { distances, previousVertices } = dijkstra(
         board,
@@ -84,7 +62,7 @@ export function playRoundsRepr(input: string, rounds: number) {
                 .getNeighbors()
                 .toArray()
                 .map(v => v.value.piece)
-                .filter(p => p.token === '.')
+                .filter(p => p.isEmpty())
                 .map(p => p.getKey())
             )
           )
@@ -158,7 +136,7 @@ class Board extends Graph<Cell> {
         const players: string[] = []
         const symbols = sortBy(cell => cell.x, row)
           .map(cell => {
-            if (cell.piece instanceof Player) {
+            if (cell.piece.isPlayer()) {
               players.push(cell.piece.toString())
             }
             return cell.piece.token
@@ -182,7 +160,7 @@ class Board extends Graph<Cell> {
   public getAllPlayers() {
     return this.getAllVertices()
       .map(vertex => vertex.value.piece)
-      .filter(piece => piece instanceof Player) as Player[]
+      .filter(piece => piece.isPlayer()) as Player[]
   }
   private createEdge(
     startVertex: GraphVertex<Cell>,
@@ -259,6 +237,13 @@ abstract class Piece {
   public getKey() {
     return this.cell.getKey()
   }
+
+  public isEmpty(): this is EmptyPiece {
+    return this instanceof EmptyPiece
+  }
+  public isPlayer(): this is Player {
+    return this instanceof Player
+  }
 }
 
 class EmptyPiece extends Piece {
@@ -272,11 +257,12 @@ abstract class Player extends Piece {
   public readonly attackPower = 3
   public readonly hitPoints = 200
 
-  /**
-   * toString
-   */
   public toString() {
     return `${this.token}(${this.hitPoints})`
+  }
+
+  public isEnemy(player: Player) {
+    return player.token !== this.token
   }
 }
 
@@ -285,4 +271,26 @@ class GoblinPlayer extends Player {
 }
 class ElfPlayer extends Player {
   public token: Token = 'E'
+}
+
+const dijkstraOptions: IDijkstraOptions<Cell> = {
+  queueCompareFn(this, l, r) {
+    const lKey = l.toString()
+    const rKey = r.toString()
+    const lPriority = this.priorities[lKey]
+    const rPriority = this.priorities[rKey]
+
+    if (lPriority === rPriority) {
+      if (lKey === rKey) {
+        return 0
+      } else {
+        return lKey < rKey ? -1 : 1
+      }
+    }
+
+    return lPriority < rPriority ? -1 : 1
+  },
+  canTraverse(neighbor) {
+    return neighbor.value.piece.isEmpty()
+  },
 }
