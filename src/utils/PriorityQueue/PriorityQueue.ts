@@ -2,8 +2,21 @@ import Comparator from '../Comparator'
 import { MinHeap } from '../Heap'
 
 export default class PriorityQueue<T> extends MinHeap<T> {
-  protected compare = new Comparator(
-    function compare(this: PriorityQueue<T>, l: T, r: T) {
+  public priorities: { [key: string]: number } = {}
+  protected compare: Comparator<T>
+
+  private compareValue = new Comparator(function compareValue(a: T, b: T) {
+    if (a === b) return 0
+
+    return a < b ? -1 : 1
+  })
+
+  constructor(compareFn?: (l: T, R: T) => 0 | -1 | 1) {
+    super()
+
+    this.compare = new Comparator((compareFn || defaultCompareFn).bind(this))
+
+    function defaultCompareFn(this: PriorityQueue<T>, l: T, r: T) {
       if (this.priorities[l.toString()] === this.priorities[r.toString()]) {
         return 0
       }
@@ -11,16 +24,8 @@ export default class PriorityQueue<T> extends MinHeap<T> {
       return this.priorities[l.toString()] < this.priorities[r.toString()]
         ? -1
         : 1
-    }.bind(this)
-  )
-
-  private priorities: { [key: string]: number } = {}
-
-  private compareValue = new Comparator(function compareValue(a: T, b: T) {
-    if (a === b) return 0
-
-    return a < b ? -1 : 1
-  })
+    }
+  }
 
   public add(item: T, priority = 0) {
     this.priorities[item.toString()] = priority

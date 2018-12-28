@@ -1,147 +1,274 @@
-import { head, times } from 'ramda'
+import { groupBy, identity, isEmpty, pick, sortBy, uniq, unnest } from 'ramda'
+import dijkstra, { IDijkstraOptions } from '../utils/dijkstra'
+import { Graph, GraphEdge, GraphVertex } from '../utils/Graph'
 import parseLines from '../utils/parseLines'
 
-const inspect = Symbol.for('nodejs.util.inspect.custom')
+type Token = '#' | '.' | 'G' | 'E'
 
-export function playRoundsRepr(input: string, rounds: number) {
-  const lines = parseLines(input)
-
-  const board = lines.reduce(
-    (b, line, y) =>
-      line
-        .split('')
-        .reduce((_b, value, x) => _b.initCell(x, y, value as CellValue), b),
-    new Board(lines.length, head(lines)!.length)
-  )
-  return board.REPR()
+enum Direction {
+  N,
+  S,
+  E,
+  W,
 }
 
-type CellValue = '#' | '.' | 'G' | 'E'
+const dijkstraOptions: IDijkstraOptions<Cell> = {
+  queueCompareFn(this, l, r) {
+    const lKey = l.toString()
+    const rKey = r.toString()
+    const lPriority = this.priorities[lKey]
+    const rPriority = this.priorities[rKey]
 
-class Board {
-  private cells: Cell[][]
-
-  constructor(height: number, width: number) {
-    this.cells = times(y => times(x => new Cell(x, y), width), height)
-
-    this.cells.forEach(
-      row => void row.forEach(cell => void this.connectCell(cell))
-    )
-  }
-
-  public initCell(x: number, y: number, value: CellValue) {
-    const cell = this.getCell(x, y)
-
-    if (isUndefined(cell)) throw new Error('Something went wrong.')
-
-    switch (value) {
-      case '#':
-        cell.setValue(new Obstacle())
-        break
-      case 'E':
-        cell.setValue(new Elf())
-        break
-      case 'G':
-        cell.setValue(new Goblin())
-        break
+    if (lPriority === rPriority) {
+      if (lKey === rKey) {
+        return 0
+      } else {
+        return lKey < rKey ? -1 : 1
+      }
     }
 
-    return this
+    return lPriority < rPriority ? -1 : 1
+  },
+  canTraverse(neighbor) {
+    return neighbor.value.piece instanceof EmptyPiece
+  },
+}
+
+export function playRoundsRepr(input: string, rounds: number) {
+  const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
+
+  const board = Board.from(tokenGrid)
+
+  for (let round = 0; round < rounds; round++) {
+    const players = board.getAllPlayers()
+
+    players.forEach(player => {
+      const playerKey = player.getKey()
+      const vertex = board.getVertexByKey(playerKey)
+      const enemies = players.filter(p => p.token !== player.token)
+
+      const neighborEnemies = vertex
+        .getNeighbors()
+        .toArray()
+        .map(v => v.value.piece)
+        .filter((piece): piece is Player => piece instanceof Player)
+        .filter(p => enemies.includes(p))
+
+      if (neighborEnemies.length) return
+
+      const { distances, previousVertices } = dijkstra(
+        board,
+        vertex,
+        dijkstraOptions
+      )
+      const previousVerticesByKey: {
+        [key: string]: string | null
+      } = Object.keys(previousVertices).reduce(
+        (obj, key) => ({
+          ...obj,
+          [key]:
+            previousVertices[key] === null
+              ? null
+              : previousVertices[key]!.getKey(),
+        }),
+        {}
+      )
+
+      const enemyNeighbors = sortBy<string>(
+        identity,
+        uniq(
+          unnest(
+            enemies.map(e =>
+              board
+                .getVertexByKey(e.getKey())
+                .getNeighbors()
+                .toArray()
+                .map(v => v.value.piece)
+                .filter(p => p.token === '.')
+                .map(p => p.getKey())
+            )
+          )
+        )
+      )
+
+      const enemyDistances = pick(enemyNeighbors, distances)
+      if (isEmpty(enemyDistances)) return
+      const target = Object.entries(enemyDistances).reduce((curr, next) =>
+        next[1] < curr[1] ? next : curr
+      )[0]
+
+      let nextMove: string = target
+      while (true) {
+        if (previousVerticesByKey[nextMove] === playerKey) break
+        if (previousVerticesByKey[nextMove] === null) {
+          throw new Error('Something went wrong.')
+        }
+        nextMove = previousVerticesByKey[nextMove]!
+      }
+
+      board.move(player, nextMove)
+    })
   }
 
-  public REPR() {
-    return this.cells
-      .map(row => row.map(cell => cell.REPR()).join(''))
+  return board.print()
+}
+
+class Board extends Graph<Cell> {
+  public static from(tokenGrid: Token[][]) {
+    const board = new Board()
+
+    tokenGrid.forEach((tokenRow, y) =>
+      tokenRow.forEach((token, x) => {
+        board.addVertex(new GraphVertex(new Cell(x, y, token)))
+      })
+    )
+
+    board.getAllVertices().forEach(vertex => {
+      const { x, y } = vertex.value
+
+      board.createEdge(
+        vertex,
+        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.N))
+      )
+      board.createEdge(
+        vertex,
+        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.W))
+      )
+      board.createEdge(
+        vertex,
+        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.E))
+      )
+      board.createEdge(
+        vertex,
+        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.S))
+      )
+    })
+
+    return board
+  }
+
+  public print() {
+    return Object.values(
+      groupBy(
+        cell => cell.y.toString(),
+        this.getAllVertices().map(vertex => vertex.value)
+      )
+    )
+      .map(row =>
+        sortBy(cell => cell.x, row)
+          .map(cell => cell.piece.token)
+          .join('')
+      )
       .join('\n')
   }
 
-  private getCell(x: number, y: number): Maybe<Cell> {
-    if (x < 0 || y < 0) return null
-    const row = this.cells[y]
-    if (!Array.isArray(row) || row.length <= x) return null
-    const cell = row[x]
+  public move(player: Player, targetKey: string) {
+    const targetCell = this.getVertexByKey(targetKey).value
+    if (!(targetCell.piece instanceof EmptyPiece)) {
+      throw new Error('Cannot move player to a non  empty Cell')
+    }
 
-    return cell
+    player.cell.piece = new EmptyPiece(player.cell)
+    ;[targetCell.piece, player.cell] = [player, targetCell]
   }
 
-  private connectCell(cell: Cell) {
-    const { x, y } = cell
-    cell.setNeighbors(
-      this.getCell(x, y - 1),
-      this.getCell(x + 1, y),
-      this.getCell(x, y + 1),
-      this.getCell(x - 1, y)
-    )
+  public getAllPlayers() {
+    return this.getAllVertices()
+      .map(vertex => vertex.value.piece)
+      .filter(piece => piece instanceof Player) as Player[]
   }
-}
+  private createEdge(
+    startVertex: GraphVertex<Cell>,
+    endVertex: GraphVertex<Cell>
+  ) {
+    if (
+      startVertex.value.piece.token === '#' ||
+      endVertex.value.piece.token === '#'
+    ) {
+      return this
+    }
 
-type Maybe<T> = T | null
+    this.addEdge(new GraphEdge(startVertex, endVertex, 1))
 
-function isDefined<T>(x: Maybe<T>): x is T {
-  return x !== null
-}
-
-function isUndefined<T>(x: Maybe<T>): x is null {
-  return x === null
+    return this
+  }
 }
 
 class Cell {
-  public readonly x: number
-  public readonly y: number
-  private n: Maybe<Cell> = null
-  private e: Maybe<Cell> = null
-  private s: Maybe<Cell> = null
-  private w: Maybe<Cell> = null
-  private value: CellContent = new Empty()
+  public static getKey(x: number, y: number) {
+    return `${y.toString().padStart(2, '0')}_${x.toString().padStart(2, '0')}`
+  }
 
-  constructor(x: number, y: number) {
+  public static getKeyByDirection(x: number, y: number, direction: Direction) {
+    switch (direction) {
+      case Direction.N:
+        return Cell.getKey(x, y - 1)
+      case Direction.S:
+        return Cell.getKey(x, y + 1)
+      case Direction.E:
+        return Cell.getKey(x + 1, y)
+      case Direction.W:
+        return Cell.getKey(x - 1, y)
+    }
+  }
+  public piece: Piece
+  public x: number
+  public y: number
+  constructor(x: number, y: number, token: Token) {
     this.x = x
     this.y = y
+
+    this.piece = Piece.from(token, this)
   }
 
-  public setValue(value: CellContent) {
-    this.value = value
+  public getKey() {
+    return Cell.getKey(this.x, this.y)
   }
 
-  public REPR() {
-    return this.value.REPR()
-  }
-  public setNeighbors(
-    n: Maybe<Cell>,
-    e: Maybe<Cell>,
-    s: Maybe<Cell>,
-    w: Maybe<Cell>
-  ) {
-    this.n = n
-    this.e = e
-    this.s = s
-    this.w = w
-  }
-
-  public [inspect]() {
-    return `Cell { x: ${this.x} y: ${this.y} v: '${this.value.symbol}' }`
+  public toString() {
+    return this.getKey()
   }
 }
 
-abstract class CellContent {
-  public abstract readonly symbol: CellValue
+abstract class Piece {
+  public static from(token: Token, cell: Cell) {
+    switch (token) {
+      case '.':
+        return new EmptyPiece(cell)
+      case '#':
+        return new WallPiece(cell)
+      case 'G':
+        return new GoblinPlayer(cell)
+      case 'E':
+        return new ElfPlayer(cell)
+    }
+  }
+  public abstract readonly token: Token
+  public cell: Cell
+  constructor(cell: Cell) {
+    this.cell = cell
+  }
 
-  public REPR() {
-    return this.symbol
+  public getKey() {
+    return this.cell.getKey()
   }
 }
 
-class Empty extends CellContent {
-  public readonly symbol: CellValue = '.'
+class EmptyPiece extends Piece {
+  public token: Token = '.'
 }
-class Obstacle extends CellContent {
-  public readonly symbol: CellValue = '#'
+class WallPiece extends Piece {
+  public token: Token = '#'
 }
 
-abstract class Player extends CellContent {}
-class Goblin extends Player {
-  public readonly symbol: CellValue = 'G'
+abstract class Player extends Piece {
+  public readonly attackPower = 3
+  public readonly hitPoints = 200
 }
-class Elf extends Player {
-  public readonly symbol: CellValue = 'E'
+
+class GoblinPlayer extends Player {
+  public token: Token = 'G'
+}
+class ElfPlayer extends Player {
+  public token: Token = 'E'
 }

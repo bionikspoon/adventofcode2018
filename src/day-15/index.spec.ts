@@ -2,12 +2,13 @@ import { playRoundsRepr } from '.'
 import { getInput } from '../utils/tests'
 
 describe.each`
-  file                    | rounds | reprFile
-  ${'case-1-round-0.txt'} | ${0}   | ${'case-1-round-0.txt'}
-  ${'case-1-round-0.txt'} | ${1}   | ${'case-1-round-1.txt'}
-  ${'case-1-round-0.txt'} | ${2}   | ${'case-1-round-2.txt'}
-  ${'case-1-round-0.txt'} | ${3}   | ${'case-1-round-3.txt'}
-`('given input $file', ({ file, rounds, reprFile }) => {
+  file                    | rounds | reprFile                | skip
+  ${'case-1-round-0.txt'} | ${0}   | ${'case-1-round-0.txt'} | ${false}
+  ${'case-1-round-0.txt'} | ${1}   | ${'case-1-round-1.txt'} | ${false}
+  ${'case-1-round-0.txt'} | ${2}   | ${'case-1-round-2.txt'} | ${false}
+  ${'case-1-round-0.txt'} | ${3}   | ${'case-1-round-3.txt'} | ${false}
+`('given input $file', ({ file, rounds, reprFile, skip }) => {
+  const TEST = skip ? test.skip : test
   let input: string
   let repr: string
 
@@ -16,7 +17,7 @@ describe.each`
     repr = await getInput(__dirname, reprFile)
   })
 
-  test('it can move avatars per round', () => {
+  TEST(`after ${rounds} round(s) it has a state`, () => {
     expect(playRoundsRepr(input, rounds)).toEqual(repr)
   })
 })
