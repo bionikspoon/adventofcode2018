@@ -154,11 +154,18 @@ class Board extends Graph<Cell> {
         this.getAllVertices().map(vertex => vertex.value)
       )
     )
-      .map(row =>
-        sortBy(cell => cell.x, row)
-          .map(cell => cell.piece.token)
+      .map(row => {
+        const players: string[] = []
+        const symbols = sortBy(cell => cell.x, row)
+          .map(cell => {
+            if (cell.piece instanceof Player) {
+              players.push(cell.piece.toString())
+            }
+            return cell.piece.token
+          })
           .join('')
-      )
+        return players.length ? `${symbols}   ${players.join(', ')}` : symbols
+      })
       .join('\n')
   }
 
@@ -264,6 +271,13 @@ class WallPiece extends Piece {
 abstract class Player extends Piece {
   public readonly attackPower = 3
   public readonly hitPoints = 200
+
+  /**
+   * toString
+   */
+  public toString() {
+    return `${this.token}(${this.hitPoints})`
+  }
 }
 
 class GoblinPlayer extends Player {
