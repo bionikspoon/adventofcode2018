@@ -1,6 +1,7 @@
 import { groupBy, sortBy, uniq } from 'ramda'
 import { Graph, GraphEdge, GraphVertex } from '../utils/Graph'
 import Cell from './Cell'
+import GameOverError from './GameOverError'
 import { EmptyPiece, Player } from './Piece'
 import { Direction, Token } from './shared'
 
@@ -115,7 +116,7 @@ export default class Board extends Graph<Cell> {
   private assertMultipleTeams() {
     const players = this.getAllPlayers()
     if (uniq(players.map(p => p.token)).length <= 1) {
-      throw new Error('Only one team left.')
+      throw new GameOverError('Only one team left.')
     }
   }
 }

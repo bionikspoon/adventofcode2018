@@ -1,5 +1,6 @@
 import parseLines from '../utils/parseLines'
 import Board from './Board'
+import GameOverError from './GameOverError'
 import { Token } from './shared'
 export function playRoundsRepr(input: string, rounds: number) {
   const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
@@ -10,7 +11,9 @@ export function playRoundsRepr(input: string, rounds: number) {
     try {
       board.playRound()
     } catch (error) {
-      continue
+      if (error instanceof GameOverError) continue
+
+      throw error
     }
   }
 
@@ -27,7 +30,9 @@ export function simulateBattle(input: string) {
     try {
       board.playRound()
     } catch (error) {
-      break
+      if (error instanceof GameOverError) break
+
+      throw error
     }
     rounds++
   }
