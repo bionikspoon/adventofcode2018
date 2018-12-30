@@ -95,7 +95,6 @@ export default class Board extends Graph<Cell> {
 
   public deletePlayer(player: Player) {
     player.cell.piece = new EmptyPiece(player.cell)
-    player.cell = new Cell(player.cell.x, player.cell.y, '.')
   }
 
   private createEdge(

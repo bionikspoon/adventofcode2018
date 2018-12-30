@@ -2,42 +2,47 @@ import { playRoundsRepr } from '.'
 import { getInput } from '../utils/tests'
 
 describe.each`
-  file            | rounds | reprFile                 | skip
-  ${'case-1.txt'} | ${0}   | ${'case-1-round-0.txt'}  | ${false}
-  ${'case-1.txt'} | ${1}   | ${'case-1-round-1.txt'}  | ${false}
-  ${'case-1.txt'} | ${2}   | ${'case-1-round-2.txt'}  | ${false}
-  ${'case-1.txt'} | ${3}   | ${'case-1-round-3.txt'}  | ${false}
-  ${'case-2.txt'} | ${0}   | ${'case-2-round-00.txt'} | ${false}
-  ${'case-2.txt'} | ${1}   | ${'case-2-round-01.txt'} | ${false}
-  ${'case-2.txt'} | ${2}   | ${'case-2-round-02.txt'} | ${false}
-  ${'case-2.txt'} | ${23}  | ${'case-2-round-23.txt'} | ${false}
-  ${'case-2.txt'} | ${24}  | ${'case-2-round-24.txt'} | ${false}
-  ${'case-2.txt'} | ${25}  | ${'case-2-round-25.txt'} | ${false}
-  ${'case-2.txt'} | ${26}  | ${'case-2-round-26.txt'} | ${false}
-  ${'case-2.txt'} | ${27}  | ${'case-2-round-27.txt'} | ${false}
-  ${'case-2.txt'} | ${28}  | ${'case-2-round-28.txt'} | ${false}
-  ${'case-2.txt'} | ${47}  | ${'case-2-round-47.txt'} | ${false}
-  ${'case-3.txt'} | ${0}   | ${'case-3-round-00.txt'} | ${false}
-  ${'case-3.txt'} | ${38}  | ${'case-3-round-38.txt'} | ${false}
-  ${'case-4.txt'} | ${0}   | ${'case-4-round-00.txt'} | ${false}
-  ${'case-4.txt'} | ${47}  | ${'case-4-round-47.txt'} | ${false}
-  ${'case-5.txt'} | ${0}   | ${'case-5-round-00.txt'} | ${false}
-  ${'case-5.txt'} | ${36}  | ${'case-5-round-36.txt'} | ${false}
-  ${'case-6.txt'} | ${0}   | ${'case-6-round-00.txt'} | ${false}
-  ${'case-6.txt'} | ${55}  | ${'case-6-round-55.txt'} | ${false}
-  ${'case-7.txt'} | ${0}   | ${'case-7-round-00.txt'} | ${false}
-  ${'case-7.txt'} | ${21}  | ${'case-7-round-21.txt'} | ${false}
-`('given input $file', ({ file, rounds, reprFile, skip }) => {
+  file        | rounds | skip
+  ${'case-1'} | ${0}   | ${false}
+  ${'case-1'} | ${1}   | ${false}
+  ${'case-1'} | ${2}   | ${false}
+  ${'case-1'} | ${3}   | ${false}
+  ${'case-2'} | ${0}   | ${false}
+  ${'case-2'} | ${1}   | ${false}
+  ${'case-2'} | ${2}   | ${false}
+  ${'case-2'} | ${23}  | ${false}
+  ${'case-2'} | ${24}  | ${false}
+  ${'case-2'} | ${25}  | ${false}
+  ${'case-2'} | ${26}  | ${false}
+  ${'case-2'} | ${27}  | ${false}
+  ${'case-2'} | ${28}  | ${false}
+  ${'case-2'} | ${47}  | ${false}
+  ${'case-3'} | ${0}   | ${false}
+  ${'case-3'} | ${38}  | ${false}
+  ${'case-4'} | ${0}   | ${false}
+  ${'case-4'} | ${47}  | ${false}
+  ${'case-5'} | ${0}   | ${false}
+  ${'case-5'} | ${36}  | ${false}
+  ${'case-6'} | ${0}   | ${false}
+  ${'case-6'} | ${55}  | ${false}
+  ${'case-7'} | ${0}   | ${false}
+  ${'case-7'} | ${21}  | ${false}
+  ${'input'}  | ${0}   | ${false}
+`('given input $file', ({ file, rounds, skip }) => {
   const TEST = skip ? test.skip : test
   let input: string
-  let repr: string
+  let expected: string
 
   beforeEach(async () => {
-    input = await getInput(__dirname, file)
-    repr = await getInput(__dirname, reprFile)
+    const inputFile = `${file}.txt`
+    const expectedFile = `${file}-round-${rounds
+      .toString()
+      .padStart(2, '0')}.txt`
+    input = await getInput(__dirname, inputFile)
+    expected = await getInput(__dirname, expectedFile)
   })
 
   TEST(`after ${rounds} round(s) it has a state`, () => {
-    expect(playRoundsRepr(input, rounds)).toEqual(repr)
+    expect(playRoundsRepr(input, rounds)).toEqual(expected)
   })
 })
