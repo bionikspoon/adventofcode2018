@@ -64,8 +64,8 @@ export class WallPiece extends Piece {
 }
 
 export abstract class Player extends Piece {
+  public hitPoints = 200
   private readonly attackPower = 3
-  private hitPoints = 200
 
   public toString() {
     return `${this.token}(${this.hitPoints})`

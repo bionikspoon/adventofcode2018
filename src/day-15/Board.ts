@@ -1,4 +1,4 @@
-import { groupBy, sortBy } from 'ramda'
+import { groupBy, sortBy, uniq } from 'ramda'
 import { Graph, GraphEdge, GraphVertex } from '../utils/Graph'
 import Cell from './Cell'
 import { EmptyPiece, Player } from './Piece'
@@ -71,8 +71,10 @@ export default class Board extends Graph<Cell> {
 
       const nextMove = player.findNextMove(this)
       if (nextMove) this.move(player, nextMove)
-      return player.initiateAttack(this)
+
+      player.initiateAttack(this)
     })
+    this.assertMultipleTeams()
 
     return this
   }
@@ -80,7 +82,7 @@ export default class Board extends Graph<Cell> {
   public move(player: Player, targetKey: string) {
     const targetCell = this.getVertexByKey(targetKey).value
     if (!targetCell.piece.isEmpty()) {
-      throw new Error('Cannot move player to a non  empty Cell')
+      throw new Error('Cannot move player to a non empty Cell')
     }
 
     player.cell.piece = new EmptyPiece(player.cell)
@@ -108,5 +110,11 @@ export default class Board extends Graph<Cell> {
     this.addEdge(new GraphEdge(startVertex, endVertex, 1))
 
     return this
+  }
+  private assertMultipleTeams() {
+    const players = this.getAllPlayers()
+    if (uniq(players.map(p => p.token)).length <= 1) {
+      throw new Error('Only one team left.')
+    }
   }
 }
