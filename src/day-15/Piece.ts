@@ -1,5 +1,16 @@
+import {
+  ascend,
+  head,
+  identity,
+  isEmpty,
+  sortBy,
+  sortWith,
+  uniq,
+  unnest,
+} from 'ramda'
 import Board from './Board'
 import Cell from './Cell'
+import modifiedDijkstra from './modifiedDijkstra'
 import { Token } from './shared'
 
 export abstract class Piece {
@@ -25,14 +36,6 @@ export abstract class Piece {
     return this.cell.getKey()
   }
 
-  public getAdjacentPieces(board: Board) {
-    return board
-      .getVertexByKey(this.getKey())
-      .getNeighbors()
-      .toArray()
-      .map(v => v.value.piece)
-  }
-
   public isEmpty(): this is EmptyPiece {
     return this instanceof EmptyPiece
   }
@@ -42,6 +45,14 @@ export abstract class Piece {
 
   public isPlayer(): this is Player {
     return this instanceof Player
+  }
+
+  protected getAdjacentPieces(board: Board) {
+    return board
+      .getVertexByKey(this.getKey())
+      .getNeighbors()
+      .toArray()
+      .map(v => v.value.piece)
   }
 }
 
@@ -53,28 +64,72 @@ export class WallPiece extends Piece {
 }
 
 export abstract class Player extends Piece {
-  public readonly attackPower = 3
-  public hitPoints = 200
+  private readonly attackPower = 3
+  private hitPoints = 200
 
   public toString() {
     return `${this.token}(${this.hitPoints})`
   }
+  public hasAdjacentEnemy(board: Board) {
+    return Boolean(this.getAdjacentEnemies(board).length)
+  }
+  public findNextMove(board: Board) {
+    const playerKey = this.getKey()
 
-  public isEnemy(player: Player) {
-    return player.token !== this.token
+    const { distances, previousVertices } = modifiedDijkstra(
+      board,
+      board.getVertexByKey(playerKey),
+      this.getEnemyAdjacentKeys(board)
+    )
+
+    if (isEmpty(distances)) return
+
+    return findNextMoveToTarget(
+      findClosestKey(distances),
+      playerKey,
+      previousVertices
+    )
   }
 
-  public getAdjacentEnemies(board: Board) {
+  public initiateAttack(board: Board) {
+    const adjacentEnemies = this.getAdjacentEnemies(board)
+    const target = head(
+      sortWith(
+        [
+          ascend<Player>(p => p.hitPoints),
+          ascend<Player>(p => p.cell.y),
+          ascend<Player>(p => p.cell.x),
+        ],
+        adjacentEnemies
+      )
+    )
+    if (target) this.attack(target, board)
+  }
+
+  private isEnemy(player: Player) {
+    return player.token !== this.token
+  }
+  private getAdjacentEnemies(board: Board) {
     return this.getAdjacentPieces(board)
       .filter((piece): piece is Player => piece.isPlayer())
       .filter(this.isEnemy.bind(this))
   }
 
-  public hasAdjacentEnemy(board: Board) {
-    return Boolean(this.getAdjacentEnemies(board).length)
+  private getEnemyAdjacentKeys(board: Board) {
+    return flatSort(
+      board
+        .getAllPlayers()
+        .filter(this.isEnemy.bind(this))
+        .map(enemy =>
+          enemy
+            .getAdjacentPieces(board)
+            .filter(p => p.isEmpty())
+            .map(p => p.getKey())
+        )
+    )
   }
 
-  public attack(player: Player, board: Board) {
+  private attack(player: Player, board: Board) {
     player.hitPoints -= this.attackPower
     if (player.hitPoints <= 0) {
       board.deletePlayer(player)
@@ -87,4 +142,32 @@ export class GoblinPlayer extends Player {
 }
 export class ElfPlayer extends Player {
   public token: Token = 'E'
+}
+
+const flatSort = (items: string[][]) =>
+  sortBy<string>(identity, uniq(unnest(items)))
+
+function findClosestKey(distances: { [key: string]: number }) {
+  return Object.entries(distances).reduce((curr, next) =>
+    next[1] < curr[1] ? next : curr
+  )[0]
+}
+
+function findNextMoveToTarget(
+  target: string,
+  playerKey: string,
+  previousVertices: { [key: string]: string | null }
+) {
+  if (previousVertices[target] === null) return
+
+  let nextMove: string = target
+
+  while (
+    previousVertices[nextMove] !== playerKey &&
+    previousVertices[nextMove] !== null
+  ) {
+    nextMove = previousVertices[nextMove]!
+  }
+
+  return nextMove
 }

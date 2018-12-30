@@ -60,6 +60,22 @@ export default class Board extends Graph<Cell> {
       .join('\n')
   }
 
+  public playRound() {
+    const players = this.getAllPlayers()
+
+    players.forEach(player => {
+      if (player.hasAdjacentEnemy(this)) {
+        return player.initiateAttack(this)
+      }
+
+      const nextMove = player.findNextMove(this)
+      if (nextMove) this.move(player, nextMove)
+      return player.initiateAttack(this)
+    })
+
+    return this
+  }
+
   public move(player: Player, targetKey: string) {
     const targetCell = this.getVertexByKey(targetKey).value
     if (!targetCell.piece.isEmpty()) {
@@ -79,6 +95,7 @@ export default class Board extends Graph<Cell> {
   public deletePlayer(player: Player) {
     player.cell.piece = new EmptyPiece(player.cell)
   }
+
   private createEdge(
     startVertex: GraphVertex<Cell>,
     endVertex: GraphVertex<Cell>
