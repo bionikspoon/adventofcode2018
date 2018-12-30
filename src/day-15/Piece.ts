@@ -54,7 +54,7 @@ export class WallPiece extends Piece {
 
 export abstract class Player extends Piece {
   public readonly attackPower = 3
-  public readonly hitPoints = 200
+  public hitPoints = 200
 
   public toString() {
     return `${this.token}(${this.hitPoints})`
@@ -64,12 +64,21 @@ export abstract class Player extends Piece {
     return player.token !== this.token
   }
 
-  public hasAdjacentEnemy(board: Board) {
-    const adjacentEnemies = this.getAdjacentPieces(board)
+  public getAdjacentEnemies(board: Board) {
+    return this.getAdjacentPieces(board)
       .filter((piece): piece is Player => piece.isPlayer())
       .filter(this.isEnemy.bind(this))
+  }
 
-    return Boolean(adjacentEnemies.length)
+  public hasAdjacentEnemy(board: Board) {
+    return Boolean(this.getAdjacentEnemies(board).length)
+  }
+
+  public attack(player: Player, board: Board) {
+    player.hitPoints -= this.attackPower
+    if (player.hitPoints <= 0) {
+      board.deletePlayer(player)
+    }
   }
 }
 

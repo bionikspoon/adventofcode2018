@@ -75,6 +75,10 @@ export default class Board extends Graph<Cell> {
       .map(vertex => vertex.value.piece)
       .filter((piece): piece is Player => piece.isPlayer())
   }
+
+  public deletePlayer(player: Player) {
+    player.cell.piece = new EmptyPiece(player.cell)
+  }
   private createEdge(
     startVertex: GraphVertex<Cell>,
     endVertex: GraphVertex<Cell>
