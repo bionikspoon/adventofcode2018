@@ -136,9 +136,8 @@ export abstract class Player extends Piece {
 
   private attack(player: Player, board: Board) {
     player.hitPoints -= this.attackPower
-    if (!player.isAlive()) {
-      board.deletePlayer(player)
-    }
+
+    if (!player.isAlive()) board.deletePlayer(player)
   }
 }
 

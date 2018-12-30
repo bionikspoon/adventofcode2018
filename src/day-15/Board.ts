@@ -11,7 +11,9 @@ export default class Board extends Graph<Cell> {
 
     tokenGrid.forEach((tokenRow, y) =>
       tokenRow.forEach((token, x) => {
-        board.addVertex(new GraphVertex(new Cell(x, y, token)))
+        const cell = new Cell(x, y, token)
+        board.addVertex(new GraphVertex(cell))
+        if (cell.piece.isPlayer()) board.addPlayer(cell.piece)
       })
     )
 
@@ -38,6 +40,7 @@ export default class Board extends Graph<Cell> {
 
     return board
   }
+  private players: Player[] = []
 
   public print() {
     return Object.values(
@@ -62,7 +65,7 @@ export default class Board extends Graph<Cell> {
   }
 
   public playRound() {
-    const players = this.getAllPlayers()
+    const players = sortBy(p => p.getKey(), this.getAllPlayers())
 
     players.forEach((player, index) => {
       if (!player.isAlive()) return
@@ -92,13 +95,18 @@ export default class Board extends Graph<Cell> {
   }
 
   public getAllPlayers() {
-    return this.getAllVertices()
-      .map(vertex => vertex.value.piece)
-      .filter((piece): piece is Player => piece.isPlayer())
+    return this.players
   }
 
   public deletePlayer(player: Player) {
     player.cell.piece = new EmptyPiece(player.cell)
+    const playerKey = player.getKey()
+    this.players = this.players.filter(p => p.getKey() !== playerKey)
+  }
+
+  private addPlayer(player: Player) {
+    this.players.push(player)
+    return this
   }
 
   private createEdge(

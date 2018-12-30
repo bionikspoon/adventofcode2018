@@ -1,4 +1,4 @@
-import { pick } from 'ramda'
+import { map, pick } from 'ramda'
 import { IDijkstraOptions } from '../utils/dijkstra'
 import { Graph, GraphVertex } from '../utils/Graph'
 import PriorityQueue from '../utils/PriorityQueue'
@@ -18,14 +18,7 @@ export default function modifiedDijkstra(
   )
   const previousVerticesByKey: {
     [key: string]: string | null
-  } = Object.keys(previousVertices).reduce(
-    (obj, key) => ({
-      ...obj,
-      [key]:
-        previousVertices[key] === null ? null : previousVertices[key]!.getKey(),
-    }),
-    {}
-  )
+  } = map(value => (value === null ? null : value.getKey()), previousVertices)
 
   return {
     previousVertices: previousVerticesByKey,
@@ -35,8 +28,8 @@ export default function modifiedDijkstra(
 
 const dijkstraOptions: IDijkstraOptions<Cell> = {
   queueCompareFn(this, l, r) {
-    const lKey = l.toString()
-    const rKey = r.toString()
+    const lKey = l.getKey()
+    const rKey = r.getKey()
     const lPriority = this.priorities[lKey]
     const rPriority = this.priorities[rKey]
 

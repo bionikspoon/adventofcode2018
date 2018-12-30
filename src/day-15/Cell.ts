@@ -19,17 +19,18 @@ export default class Cell {
     }
   }
   public piece: Piece
-  public x: number
-  public y: number
+  public readonly x: number
+  public readonly y: number
+  private readonly key: string
   constructor(x: number, y: number, token: Token) {
     this.x = x
     this.y = y
-
+    this.key = Cell.getKey(this.x, this.y)
     this.piece = Piece.from(token, this)
   }
 
   public getKey() {
-    return Cell.getKey(this.x, this.y)
+    return this.key
   }
 
   public toString() {
