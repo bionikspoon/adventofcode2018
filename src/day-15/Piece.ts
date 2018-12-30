@@ -106,6 +106,10 @@ export abstract class Player extends Piece {
     if (target) this.attack(target, board)
   }
 
+  public isAlive() {
+    return this.hitPoints > 0
+  }
+
   private isEnemy(player: Player) {
     return player.token !== this.token
   }
@@ -131,7 +135,7 @@ export abstract class Player extends Piece {
 
   private attack(player: Player, board: Board) {
     player.hitPoints -= this.attackPower
-    if (player.hitPoints <= 0) {
+    if (!player.isAlive()) {
       board.deletePlayer(player)
     }
   }

@@ -64,6 +64,7 @@ export default class Board extends Graph<Cell> {
     const players = this.getAllPlayers()
 
     players.forEach(player => {
+      if (!player.isAlive()) return
       if (player.hasAdjacentEnemy(this)) {
         return player.initiateAttack(this)
       }
@@ -94,6 +95,7 @@ export default class Board extends Graph<Cell> {
 
   public deletePlayer(player: Player) {
     player.cell.piece = new EmptyPiece(player.cell)
+    player.cell = new Cell(player.cell.x, player.cell.y, '.')
   }
 
   private createEdge(

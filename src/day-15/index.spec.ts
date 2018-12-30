@@ -17,6 +17,16 @@ describe.each`
   ${'case-2.txt'} | ${27}  | ${'case-2-round-27.txt'} | ${false}
   ${'case-2.txt'} | ${28}  | ${'case-2-round-28.txt'} | ${false}
   ${'case-2.txt'} | ${47}  | ${'case-2-round-47.txt'} | ${false}
+  ${'case-3.txt'} | ${0}   | ${'case-3-round-00.txt'} | ${false}
+  ${'case-3.txt'} | ${38}  | ${'case-3-round-38.txt'} | ${false}
+  ${'case-4.txt'} | ${0}   | ${'case-4-round-00.txt'} | ${false}
+  ${'case-4.txt'} | ${47}  | ${'case-4-round-47.txt'} | ${false}
+  ${'case-5.txt'} | ${0}   | ${'case-5-round-00.txt'} | ${false}
+  ${'case-5.txt'} | ${36}  | ${'case-5-round-36.txt'} | ${false}
+  ${'case-6.txt'} | ${0}   | ${'case-6-round-00.txt'} | ${false}
+  ${'case-6.txt'} | ${55}  | ${'case-6-round-55.txt'} | ${false}
+  ${'case-7.txt'} | ${0}   | ${'case-7-round-00.txt'} | ${false}
+  ${'case-7.txt'} | ${21}  | ${'case-7-round-21.txt'} | ${false}
 `('given input $file', ({ file, rounds, reprFile, skip }) => {
   const TEST = skip ? test.skip : test
   let input: string
