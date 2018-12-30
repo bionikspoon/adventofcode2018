@@ -28,6 +28,7 @@ describe.each`
   ${'case-7'} | ${0}   | ${false}
   ${'case-7'} | ${21}  | ${false}
   ${'input'}  | ${0}   | ${false}
+  ${'input'}  | ${5}   | ${false}
 `('given input $file', ({ file, rounds, skip }) => {
   const TEST = skip ? test.skip : test
   let input: string
@@ -49,7 +50,7 @@ describe.each`
 
 describe.each`
   file        | rounds | hitPoints | result    | skip
-  ${'case-2'} | ${47}  | ${590}    | ${27730}  | ${true}
+  ${'case-2'} | ${47}  | ${590}    | ${27730}  | ${false}
   ${'case-3'} | ${37}  | ${982}    | ${36334}  | ${false}
   ${'case-4'} | ${46}  | ${859}    | ${39514}  | ${false}
   ${'case-5'} | ${35}  | ${793}    | ${27755}  | ${false}

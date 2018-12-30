@@ -93,6 +93,7 @@ export abstract class Player extends Piece {
 
   public initiateAttack(board: Board) {
     const adjacentEnemies = this.getAdjacentEnemies(board)
+
     const target = head(
       sortWith(
         [
@@ -166,10 +167,10 @@ function findNextMoveToTarget(
 
   let nextMove: string = target
 
-  while (
-    previousVertices[nextMove] !== playerKey &&
-    previousVertices[nextMove] !== null
-  ) {
+  while (previousVertices[nextMove] !== playerKey) {
+    if (previousVertices[nextMove] === null) {
+      throw new Error('Something went wrong')
+    }
     nextMove = previousVertices[nextMove]!
   }
 

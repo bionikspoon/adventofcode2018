@@ -63,18 +63,19 @@ export default class Board extends Graph<Cell> {
   public playRound() {
     const players = this.getAllPlayers()
 
-    players.forEach(player => {
+    players.forEach((player, index) => {
       if (!player.isAlive()) return
-      if (player.hasAdjacentEnemy(this)) {
-        return player.initiateAttack(this)
+      if (!player.hasAdjacentEnemy(this)) {
+        const nextMove = player.findNextMove(this)
+        if (nextMove) this.move(player, nextMove)
       }
 
-      const nextMove = player.findNextMove(this)
-      if (nextMove) this.move(player, nextMove)
-
       player.initiateAttack(this)
+
+      if (index < players.length - 1) {
+        this.assertMultipleTeams()
+      }
     })
-    this.assertMultipleTeams()
 
     return this
   }
