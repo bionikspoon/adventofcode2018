@@ -63,8 +63,13 @@ export type OpName = keyof (typeof ops)
 
 export function compute(
   [opName, a, b, c]: [OpName, number, number, number],
-  before: number[]
-) {
+  registry: [number, number, number, number]
+): [number, number, number, number] {
   const opFn = ops[opName]
-  return update(c, opFn(a, b)(before), before)
+  return update(c, opFn(a, b)(registry), registry) as [
+    number,
+    number,
+    number,
+    number
+  ]
 }
