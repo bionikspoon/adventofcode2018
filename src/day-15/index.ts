@@ -11,7 +11,7 @@ export function playRoundsRepr(
 ) {
   const board = inputToBoard(input, boardOptions)
 
-  playNRounds(board, rounds)
+  playRounds(board, rounds)
 
   return board.print()
 }
@@ -19,7 +19,7 @@ export function playRoundsRepr(
 export function simulateBattle(input: string, boardOptions?: IBoardOptions) {
   const board = inputToBoard(input, boardOptions)
 
-  const rounds = playNRounds(board, Infinity)
+  const rounds = playRounds(board, Infinity)
 
   const hitPoints = board
     .getAllPlayers()
@@ -56,17 +56,22 @@ function inputToBoard(input: string, options?: IBoardOptions) {
   return Board.from(tokenGrid, options)
 }
 
-function playNRounds(board: Board, rounds: number) {
+function playRounds(board: Board, rounds: number) {
   let round
   for (round = 0; round < rounds; round++) {
-    try {
-      board.playRound()
-    } catch (error) {
-      if (error instanceof GameOverError) break
-
-      throw error
-    }
+    if (tryPlayRound(board)) break
   }
 
   return round
+}
+
+function tryPlayRound(board: Board) {
+  try {
+    board.playRound()
+    return false
+  } catch (error) {
+    if (error instanceof GameOverError) return true
+
+    throw error
+  }
 }
