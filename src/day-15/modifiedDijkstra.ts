@@ -9,27 +9,10 @@ export default function modifiedDijkstra(
   vertex: GraphVertex<Cell>,
   keys: string[]
 ) {
-  const dijkstraOptions: IDijkstraOptions<Cell> = {
-    queueCompareFn(this, l, r) {
-      const lPriority = this.priorities[l.getKey()]
-      const rPriority = this.priorities[r.getKey()]
-
-      if (lPriority === rPriority) return compareKeys(l.getKey(), r.getKey())
-
-      return lPriority < rPriority ? -1 : 1
-    },
-    canTraverse(neighbor) {
-      return neighbor.value.piece.isEmpty()
-    },
-    shouldPoll(v) {
-      return !keys.includes(v.getKey())
-    },
-  }
-
   const { distances, previousVertices } = dijkstra(
     board,
     vertex,
-    dijkstraOptions
+    getDijkstraOptions(keys)
   )
   const previousVerticesByKey: {
     [key: string]: string | null
@@ -40,6 +23,25 @@ export default function modifiedDijkstra(
     distances: pick(keys, distances),
   }
 }
+
+const getDijkstraOptions: (
+  keys: string[]
+) => IDijkstraOptions<Cell> = keys => ({
+  queueCompareFn(this, l, r) {
+    const lPriority = this.priorities[l.getKey()]
+    const rPriority = this.priorities[r.getKey()]
+
+    if (lPriority === rPriority) return compareKeys(l.getKey(), r.getKey())
+
+    return lPriority < rPriority ? -1 : 1
+  },
+  canTraverse(neighbor) {
+    return neighbor.value.piece.isEmpty()
+  },
+  shouldPoll(v) {
+    return !keys.includes(v.getKey())
+  },
+})
 
 function compareKeys(l: string, r: string) {
   if (l === r) {

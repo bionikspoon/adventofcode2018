@@ -1,6 +1,9 @@
 import { Graph, GraphVertex } from './Graph'
 import PriorityQueue from './PriorityQueue'
 
+interface IDistances {
+  [key: string]: number
+}
 export interface IDijkstraOptions<T> {
   queueCompareFn?: (
     this: PriorityQueue<T>,
@@ -29,23 +32,17 @@ export default function dijkstra<T>(
       if (visitedVertices[neighbor.getKey()]) return
       if (options.canTraverse && !options.canTraverse(neighbor)) return
 
-      const edge = graph.findEdge(currentVertex, neighbor)!
-
       const distanceToNeighborFromCurrent =
-        distances[currentVertex.getKey()] + edge.weight
+        distances[currentVertex.getKey()] +
+        graph.findEdge(currentVertex, neighbor)!.weight
 
       if (distanceToNeighborFromCurrent < distances[neighbor.getKey()]) {
         distances[neighbor.getKey()] = distanceToNeighborFromCurrent
-
-        if (queue.hasValue(neighbor)) {
-          queue.changePriority(neighbor, distances[neighbor.getKey()])
-        }
+        updateNeighborPriority(queue, neighbor, distances)
         previousVertices[neighbor.getKey()] = currentVertex
       }
 
-      if (!queue.hasValue(neighbor)) {
-        queue.add(neighbor, distances[neighbor.getKey()])
-      }
+      ensureQueueHasNeighbor(queue, neighbor, distances)
     })
 
     visitedVertices[currentVertex.getKey()] = currentVertex
@@ -54,9 +51,8 @@ export default function dijkstra<T>(
 
   return { distances, previousVertices }
 }
-
 function initDistances<T>(graph: Graph<T>) {
-  const distances: { [key: string]: number } = {}
+  const distances: IDistances = {}
   const previousVertices: { [key: string]: GraphVertex<T> | null } = {}
 
   graph.getAllVertices().forEach(vertex => {
@@ -65,4 +61,24 @@ function initDistances<T>(graph: Graph<T>) {
   })
 
   return { distances, previousVertices }
+}
+
+function updateNeighborPriority<T>(
+  queue: PriorityQueue<GraphVertex<T>>,
+  neighbor: GraphVertex<T>,
+  distances: IDistances
+): void {
+  if (queue.hasValue(neighbor)) {
+    queue.changePriority(neighbor, distances[neighbor.getKey()])
+  }
+}
+
+function ensureQueueHasNeighbor<T>(
+  queue: PriorityQueue<GraphVertex<T>>,
+  neighbor: GraphVertex<T>,
+  distances: IDistances
+): void {
+  if (!queue.hasValue(neighbor)) {
+    queue.add(neighbor, distances[neighbor.getKey()])
+  }
 }
