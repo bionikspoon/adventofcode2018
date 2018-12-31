@@ -16,11 +16,10 @@ export default class LinkedList<T> {
 
   public get length() {
     let i = 0
-    let currentNode = this.headNode
-    while (currentNode) {
+
+    traverse(this, () => {
       i++
-      currentNode = currentNode.next
-    }
+    })
 
     return i
   }
@@ -79,18 +78,14 @@ export default class LinkedList<T> {
     return deletedNode!.value
   }
 
-  public find(predicate: (item: T) => boolean) {
-    let currentNode = this.headNode
-
-    while (currentNode) {
-      if (predicate(currentNode.value)) return currentNode.value
-
-      currentNode = currentNode.next!
-    }
-
-    return null
+  public find(predicate: (value: T) => boolean) {
+    return maybeTransform(
+      node => node.value,
+      this.findNode(node => predicate(node.value))
+    )
   }
-  public findNode(predicate: (item: LinkedListNode<T>) => boolean) {
+
+  public findNode(predicate: (node: LinkedListNode<T>) => boolean) {
     let currentNode = this.headNode
 
     while (currentNode) {
@@ -102,12 +97,12 @@ export default class LinkedList<T> {
     return null
   }
 
-  public deleteWhere(pred: (value: T) => boolean) {
+  public deleteWhere(predicate: (value: T) => boolean) {
     let prevNode: LinkedListNode<T> | null = null
     let currNode: LinkedListNode<T> | null = this.headNode
 
     while (currNode) {
-      if (!pred(currNode.value)) {
+      if (!predicate(currNode.value)) {
         prevNode = currNode
         currNode = currNode.next
         continue
@@ -128,25 +123,16 @@ export default class LinkedList<T> {
     return this
   }
 
-  public map<U>(fn: (item: T) => U) {
+  public map<U>(callback: (item: T) => U) {
     const newList = new LinkedList<U>()
 
-    let currentNode = this.headNode
+    traverse(this, value => void newList.push(callback(value)))
 
-    while (currentNode) {
-      newList.push(fn(currentNode.value))
-      currentNode = currentNode.next!
-    }
     return newList
   }
 
-  public forEach(fn: (item: T) => void) {
-    let currentNode = this.headNode
-
-    while (currentNode) {
-      fn(currentNode.value)
-      currentNode = currentNode.next!
-    }
+  public forEach(callback: (item: T) => void) {
+    traverse(this, callback)
 
     return this
   }
@@ -199,13 +185,35 @@ export default class LinkedList<T> {
   }
 
   private toNodeArray() {
-    const nodes = []
-    let currentNode = this.headNode
-    while (currentNode) {
-      nodes.push(currentNode)
-      currentNode = currentNode.next
-    }
+    const nodes: Array<LinkedListNode<T>> = []
+
+    traverseNodes(this, node => {
+      nodes.push(node)
+    })
 
     return nodes
   }
+}
+
+function traverseNodes<T>(
+  linkedList: LinkedList<T>,
+  callback: (node: LinkedListNode<T>) => void
+) {
+  let currentNode = linkedList.headNode
+
+  while (currentNode) {
+    callback(currentNode)
+    currentNode = currentNode.next
+  }
+}
+
+function traverse<T>(linkedList: LinkedList<T>, callback: (value: T) => void) {
+  traverseNodes(linkedList, node => callback(node.value))
+}
+
+function maybeTransform<T, U>(
+  transform: (value: T) => U,
+  maybeValue: T | null
+) {
+  return maybeValue === null ? null : transform(maybeValue)
 }
