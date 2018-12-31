@@ -111,13 +111,17 @@ export default class LinkedList<T> {
       if (prevNode === null) {
         this.shift()
         currNode = this.headNode
-      } else if (currNode === this.tailNode) {
+        continue
+      }
+
+      if (currNode === this.tailNode) {
         this.pop()
         currNode = prevNode.next
-      } else {
-        prevNode.next = currNode.next
-        currNode = prevNode.next
+        continue
       }
+
+      prevNode.next = currNode.next
+      currNode = prevNode.next
     }
 
     return this

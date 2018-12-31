@@ -8,23 +8,18 @@ export interface IDijkstraOptions<T> {
     r: GraphVertex<T>
   ) => 0 | -1 | 1
   canTraverse?: (neighbor: GraphVertex<T>) => boolean
+  shouldPoll?: (vertex: GraphVertex<T>) => boolean
 }
 export default function dijkstra<T>(
   graph: Graph<T>,
   startVertex: GraphVertex<T>,
   options: IDijkstraOptions<T> = {}
 ) {
-  const distances: { [key: string]: number } = {}
   const visitedVertices: { [key: string]: GraphVertex<T> } = {}
-  const previousVertices: { [key: string]: GraphVertex<T> | null } = {}
   const queue = new PriorityQueue<GraphVertex<T>>(options.queueCompareFn)
+  const { distances, previousVertices } = initDistances(graph)
 
-  graph.getAllVertices().forEach(vertex => {
-    distances[vertex.getKey()] = Infinity
-    previousVertices[vertex.getKey()] = null
-  })
   distances[startVertex.getKey()] = 0
-
   queue.add(startVertex, distances[startVertex.getKey()])
 
   while (!queue.isEmpty()) {
@@ -35,11 +30,11 @@ export default function dijkstra<T>(
       if (options.canTraverse && !options.canTraverse(neighbor)) return
 
       const edge = graph.findEdge(currentVertex, neighbor)!
-      const existingDistanceToNeighbor = distances[neighbor.getKey()]
+
       const distanceToNeighborFromCurrent =
         distances[currentVertex.getKey()] + edge.weight
 
-      if (distanceToNeighborFromCurrent < existingDistanceToNeighbor) {
+      if (distanceToNeighborFromCurrent < distances[neighbor.getKey()]) {
         distances[neighbor.getKey()] = distanceToNeighborFromCurrent
 
         if (queue.hasValue(neighbor)) {
@@ -54,7 +49,20 @@ export default function dijkstra<T>(
     })
 
     visitedVertices[currentVertex.getKey()] = currentVertex
+    if (options.shouldPoll && !options.shouldPoll(currentVertex)) break
   }
+
+  return { distances, previousVertices }
+}
+
+function initDistances<T>(graph: Graph<T>) {
+  const distances: { [key: string]: number } = {}
+  const previousVertices: { [key: string]: GraphVertex<T> | null } = {}
+
+  graph.getAllVertices().forEach(vertex => {
+    distances[vertex.getKey()] = Infinity
+    previousVertices[vertex.getKey()] = null
+  })
 
   return { distances, previousVertices }
 }
