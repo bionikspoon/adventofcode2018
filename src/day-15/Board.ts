@@ -23,22 +23,13 @@ export default class Board extends Graph<Cell> {
 
     board.getAllVertices().forEach(vertex => {
       const { x, y } = vertex.value
-
-      board.createEdge(
-        vertex,
-        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.N))
-      )
-      board.createEdge(
-        vertex,
-        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.W))
-      )
-      board.createEdge(
-        vertex,
-        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.E))
-      )
-      board.createEdge(
-        vertex,
-        board.getVertexByKey(Cell.getKeyByDirection(x, y, Direction.S))
+      ;[Direction.N, Direction.W, Direction.E, Direction.S].forEach(
+        direction => {
+          board.createEdge(
+            vertex,
+            board.getVertexByKey(Cell.getKeyByDirection(x, y, direction))
+          )
+        }
       )
     })
 

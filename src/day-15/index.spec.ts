@@ -100,7 +100,9 @@ describe.each`
   TEST(
     `after ${rounds} round(s) with elf attack power of ${elfAttackPower} it has a state`,
     () => {
-      expect(playRoundsRepr(input, rounds, elfAttackPower)).toEqual(expected)
+      expect(playRoundsRepr(input, rounds, { elfAttackPower })).toEqual(
+        expected
+      )
     }
   )
 })

@@ -26,20 +26,20 @@ export default function modifiedDijkstra(
   }
 }
 
+const compareKeys = (l: string, r: string) => {
+  if (l === r) {
+    return 0
+  } else {
+    return l < r ? -1 : 1
+  }
+}
+
 const dijkstraOptions: IDijkstraOptions<Cell> = {
   queueCompareFn(this, l, r) {
-    const lKey = l.getKey()
-    const rKey = r.getKey()
-    const lPriority = this.priorities[lKey]
-    const rPriority = this.priorities[rKey]
+    const lPriority = this.priorities[l.getKey()]
+    const rPriority = this.priorities[r.getKey()]
 
-    if (lPriority === rPriority) {
-      if (lKey === rKey) {
-        return 0
-      } else {
-        return lKey < rKey ? -1 : 1
-      }
-    }
+    if (lPriority === rPriority) return compareKeys(l.getKey(), r.getKey())
 
     return lPriority < rPriority ? -1 : 1
   },
@@ -70,38 +70,57 @@ function dijkstra<T>(
   while (!queue.isEmpty()) {
     const currentVertex = queue.poll()!
     const currentVertexKey = currentVertex.getKey()
+    const handleNeighbor = handleNeighborFactory<T>(
+      visitedVertices,
+      options,
+      graph,
+      currentVertex,
+      distances,
+      currentVertexKey,
+      queue,
+      previousVertices
+    )
 
-    graph.getNeighbors(currentVertex).forEach(neighbor => {
-      const neighborKey = neighbor.getKey()
-      if (visitedVertices[neighborKey]) return
-      if (options.canTraverse && !options.canTraverse(neighbor)) return
-      const edge = graph.findEdge(currentVertex, neighbor)!
-
-      const existingDistanceToNeighbor = distances[neighborKey]
-      const distanceToNeighborFromCurrent =
-        distances[currentVertexKey] + edge.weight
-
-      if (distanceToNeighborFromCurrent < existingDistanceToNeighbor) {
-        distances[neighborKey] = distanceToNeighborFromCurrent
-
-        if (queue.hasValue(neighbor)) {
-          queue.changePriority(neighbor, distances[neighborKey])
-        }
-
-        previousVertices[neighborKey] = currentVertex
-      }
-
-      if (!queue.hasValue(neighbor)) {
-        queue.add(neighbor, distances[neighborKey])
-      }
-    })
+    graph.getNeighbors(currentVertex).forEach(handleNeighbor)
 
     visitedVertices[currentVertexKey] = currentVertex
     if (targetKeys.includes(currentVertexKey)) break
   }
 
-  return {
-    distances,
-    previousVertices,
+  return { distances, previousVertices }
+}
+
+function handleNeighborFactory<T>(
+  visitedVertices: { [key: string]: GraphVertex<T> },
+  options: IDijkstraOptions<T>,
+  graph: Graph<T>,
+  currentVertex: GraphVertex<T>,
+  distances: { [key: string]: number },
+  currentVertexKey: string,
+  queue: PriorityQueue<GraphVertex<T>>,
+  previousVertices: { [key: string]: GraphVertex<T> | null }
+): (item: GraphVertex<T>) => void {
+  return neighbor => {
+    if (visitedVertices[neighbor.getKey()]) return
+    if (options.canTraverse && !options.canTraverse(neighbor)) return
+
+    const edge = graph.findEdge(currentVertex, neighbor)!
+    const existingDistanceToNeighbor = distances[neighbor.getKey()]
+    const distanceToNeighborFromCurrent =
+      distances[currentVertexKey] + edge.weight
+
+    if (distanceToNeighborFromCurrent < existingDistanceToNeighbor) {
+      distances[neighbor.getKey()] = distanceToNeighborFromCurrent
+
+      if (queue.hasValue(neighbor)) {
+        queue.changePriority(neighbor, distances[neighbor.getKey()])
+      }
+
+      previousVertices[neighbor.getKey()] = currentVertex
+    }
+
+    if (!queue.hasValue(neighbor)) {
+      queue.add(neighbor, distances[neighbor.getKey()])
+    }
   }
 }

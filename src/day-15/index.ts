@@ -1,25 +1,17 @@
 import parseLines from '../utils/parseLines'
 import Board, { IBoardOptions } from './Board'
-import { GameOverError, ElfDiedError } from './Errors'
+import { ElfDiedError, GameOverError } from './Errors'
 import { ElfPlayer, Player } from './Piece'
 import { Token } from './shared'
 
 export function playRoundsRepr(
   input: string,
   rounds: number,
-  elfAttackPower?: number
+  boardOptions?: IBoardOptions
 ) {
-  const board = inputToBoard(input, { elfAttackPower })
+  const board = inputToBoard(input, boardOptions)
 
-  for (let round = 0; round < rounds; round++) {
-    try {
-      board.playRound()
-    } catch (error) {
-      if (error instanceof GameOverError) continue
-
-      throw error
-    }
-  }
+  playNRounds(board, rounds)
 
   return board.print()
 }
@@ -27,17 +19,7 @@ export function playRoundsRepr(
 export function simulateBattle(input: string, boardOptions?: IBoardOptions) {
   const board = inputToBoard(input, boardOptions)
 
-  let rounds = 0
-  while (true) {
-    try {
-      board.playRound()
-    } catch (error) {
-      if (error instanceof GameOverError) break
-
-      throw error
-    }
-    rounds++
-  }
+  const rounds = playNRounds(board, Infinity)
 
   const hitPoints = board
     .getAllPlayers()
@@ -72,4 +54,19 @@ function inputToBoard(input: string, options?: IBoardOptions) {
   const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
 
   return Board.from(tokenGrid, options)
+}
+
+function playNRounds(board: Board, rounds: number) {
+  let round
+  for (round = 0; round < rounds; round++) {
+    try {
+      board.playRound()
+    } catch (error) {
+      if (error instanceof GameOverError) break
+
+      throw error
+    }
+  }
+
+  return round
 }
