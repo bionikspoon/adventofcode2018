@@ -1,11 +1,15 @@
 import parseLines from '../utils/parseLines'
-import Board from './Board'
-import GameOverError from './GameOverError'
+import Board, { IBoardOptions } from './Board'
+import { GameOverError, ElfDiedError } from './Errors'
+import { ElfPlayer, Player } from './Piece'
 import { Token } from './shared'
-export function playRoundsRepr(input: string, rounds: number) {
-  const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
 
-  const board = Board.from(tokenGrid)
+export function playRoundsRepr(
+  input: string,
+  rounds: number,
+  elfAttackPower?: number
+) {
+  const board = inputToBoard(input, { elfAttackPower })
 
   for (let round = 0; round < rounds; round++) {
     try {
@@ -20,10 +24,8 @@ export function playRoundsRepr(input: string, rounds: number) {
   return board.print()
 }
 
-export function simulateBattle(input: string) {
-  const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
-
-  const board = Board.from(tokenGrid)
+export function simulateBattle(input: string, boardOptions?: IBoardOptions) {
+  const board = inputToBoard(input, boardOptions)
 
   let rounds = 0
   while (true) {
@@ -42,4 +44,32 @@ export function simulateBattle(input: string) {
     .reduce((acc, player) => player.hitPoints + acc, 0)
 
   return { rounds, hitPoints, result: hitPoints * rounds }
+}
+
+export function findMinimumAttackPowerRequired(input: string) {
+  let elfAttackPower = 3
+  const onKill = (player: Player) => {
+    if (player instanceof ElfPlayer) {
+      throw new ElfDiedError()
+    }
+  }
+
+  while (elfAttackPower < 200) {
+    try {
+      return {
+        elfAttackPower,
+        ...simulateBattle(input, { onKill, elfAttackPower }),
+      }
+    } catch (error) {
+      elfAttackPower++
+    }
+  }
+
+  throw new Error('Something went wrong.')
+}
+
+function inputToBoard(input: string, options?: IBoardOptions) {
+  const tokenGrid = parseLines(input).map(line => line.split('') as Token[])
+
+  return Board.from(tokenGrid, options)
 }

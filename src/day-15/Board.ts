@@ -1,17 +1,21 @@
 import { groupBy, sortBy, uniq } from 'ramda'
 import { Graph, GraphEdge, GraphVertex } from '../utils/Graph'
 import Cell from './Cell'
-import GameOverError from './GameOverError'
+import { GameOverError } from './Errors'
 import { EmptyPiece, Player } from './Piece'
 import { Direction, Token } from './shared'
 
+export interface IBoardOptions {
+  onKill?: (player: Player) => void
+  elfAttackPower?: number
+}
 export default class Board extends Graph<Cell> {
-  public static from(tokenGrid: Token[][]) {
-    const board = new Board()
+  public static from(tokenGrid: Token[][], options: IBoardOptions = {}) {
+    const board = new Board(options)
 
     tokenGrid.forEach((tokenRow, y) =>
       tokenRow.forEach((token, x) => {
-        const cell = new Cell(x, y, token)
+        const cell = new Cell(x, y, token, options.elfAttackPower)
         board.addVertex(new GraphVertex(cell))
         if (cell.piece.isPlayer()) board.addPlayer(cell.piece)
       })
@@ -41,6 +45,12 @@ export default class Board extends Graph<Cell> {
     return board
   }
   private players: Player[] = []
+  private readonly options: IBoardOptions
+
+  constructor(options: IBoardOptions = {}) {
+    super()
+    this.options = options
+  }
 
   public print() {
     return Object.values(
@@ -76,7 +86,7 @@ export default class Board extends Graph<Cell> {
 
       player.initiateAttack(this)
 
-      if (index < players.length - 1) {
+      if (index < players.length - 1 || players.length <= 1) {
         this.assertMultipleTeams()
       }
     })
@@ -102,6 +112,7 @@ export default class Board extends Graph<Cell> {
     player.cell.piece = new EmptyPiece(player.cell)
     const playerKey = player.getKey()
     this.players = this.players.filter(p => p.getKey() !== playerKey)
+    if (this.options.onKill) this.options.onKill(player)
   }
 
   private addPlayer(player: Player) {
@@ -124,7 +135,7 @@ export default class Board extends Graph<Cell> {
   private assertMultipleTeams() {
     const players = this.getAllPlayers()
     if (uniq(players.map(p => p.token)).length <= 1) {
-      throw new GameOverError('Only one team left.')
+      throw new GameOverError()
     }
   }
 }

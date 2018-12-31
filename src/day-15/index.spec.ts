@@ -1,4 +1,8 @@
-import { playRoundsRepr, simulateBattle } from '.'
+import {
+  findMinimumAttackPowerRequired,
+  playRoundsRepr,
+  simulateBattle,
+} from '.'
 import { getInput } from '../utils/tests'
 
 describe.each`
@@ -72,3 +76,71 @@ describe.each`
     expect(simulateBattle(input)).toEqual({ rounds, hitPoints, result })
   })
 })
+
+describe.each`
+  file        | elfAttackPower | rounds    | skip
+  ${'case-2'} | ${15}          | ${29 + 1} | ${false}
+  ${'case-4'} | ${4}           | ${33 + 1} | ${false}
+  ${'case-5'} | ${15}          | ${37 + 1} | ${false}
+  ${'case-6'} | ${12}          | ${39 + 1} | ${false}
+  ${'case-7'} | ${34}          | ${30 + 1} | ${false}
+`('given input $file', ({ file, rounds, elfAttackPower, skip }) => {
+  const TEST = skip ? test.skip : test
+  let input: string
+  let expected: string
+
+  beforeEach(async () => {
+    const roundsString = rounds.toString().padStart(2, '0')
+    const apString = elfAttackPower.toString().padStart(2, '0')
+    const expectedFile = `${file}-round-${roundsString}-attack-power-${apString}.txt`
+    input = await getInput(__dirname, `${file}.txt`)
+    expected = await getInput(__dirname, expectedFile)
+  })
+
+  TEST(
+    `after ${rounds} round(s) with elf attack power of ${elfAttackPower} it has a state`,
+    () => {
+      expect(playRoundsRepr(input, rounds, elfAttackPower)).toEqual(expected)
+    }
+  )
+})
+
+describe.each`
+  file        | elfAttackPower | rounds | hitPoints | result   | skip
+  ${'case-2'} | ${15}          | ${29}  | ${172}    | ${4988}  | ${false}
+  ${'case-4'} | ${4}           | ${33}  | ${948}    | ${31284} | ${false}
+  ${'case-5'} | ${15}          | ${37}  | ${94}     | ${3478}  | ${false}
+  ${'case-6'} | ${12}          | ${39}  | ${166}    | ${6474}  | ${false}
+  ${'case-7'} | ${34}          | ${30}  | ${38}     | ${1140}  | ${false}
+  ${'input'}  | ${14}          | ${48}  | ${1211}   | ${58128} | ${false}
+`(
+  'given input $file',
+  ({ file, rounds, hitPoints, skip, result, elfAttackPower }) => {
+    const TEST = skip ? test.skip : test
+    let input: string
+
+    beforeEach(async () => {
+      input = await getInput(__dirname, `${file}.txt`)
+    })
+
+    TEST(
+      `with elf attack power of ${elfAttackPower} battle ends after ${rounds} rounds`,
+      () => {
+        expect(simulateBattle(input, { elfAttackPower })).toEqual({
+          rounds,
+          hitPoints,
+          result,
+        })
+      }
+    )
+
+    TEST('it finds minimum attack attack power to win', () => {
+      expect(findMinimumAttackPowerRequired(input)).toEqual({
+        elfAttackPower,
+        rounds,
+        hitPoints,
+        result,
+      })
+    })
+  }
+)

@@ -14,16 +14,16 @@ import modifiedDijkstra from './modifiedDijkstra'
 import { Token } from './shared'
 
 export abstract class Piece {
-  public static from(token: Token, cell: Cell) {
+  public static from(token: Token, cell: Cell, elfAttackPower?: number) {
     switch (token) {
       case '.':
         return new EmptyPiece(cell)
       case '#':
         return new WallPiece(cell)
       case 'G':
-        return new GoblinPlayer(cell)
+        return new GoblinPlayer(cell, 3)
       case 'E':
-        return new ElfPlayer(cell)
+        return new ElfPlayer(cell, elfAttackPower)
     }
   }
   public abstract readonly token: Token
@@ -65,7 +65,11 @@ export class WallPiece extends Piece {
 
 export abstract class Player extends Piece {
   public hitPoints = 200
-  private readonly attackPower = 3
+  private readonly attackPower: number
+  constructor(cell: Cell, attackPower = 3) {
+    super(cell)
+    this.attackPower = attackPower
+  }
 
   public toString() {
     return `${this.token}(${this.hitPoints})`
