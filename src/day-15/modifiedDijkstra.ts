@@ -70,57 +70,35 @@ function dijkstra<T>(
   while (!queue.isEmpty()) {
     const currentVertex = queue.poll()!
     const currentVertexKey = currentVertex.getKey()
-    const handleNeighbor = handleNeighborFactory<T>(
-      visitedVertices,
-      options,
-      graph,
-      currentVertex,
-      distances,
-      currentVertexKey,
-      queue,
-      previousVertices
-    )
 
-    graph.getNeighbors(currentVertex).forEach(handleNeighbor)
+    graph.getNeighbors(currentVertex).forEach(neighbor => {
+      if (visitedVertices[neighbor.getKey()]) return
+      if (options.canTraverse && !options.canTraverse(neighbor)) return
+
+      const edge = graph.findEdge(currentVertex, neighbor)!
+      const existingDistanceToNeighbor = distances[neighbor.getKey()]
+      const distanceToNeighborFromCurrent =
+        distances[currentVertexKey] + edge.weight
+
+      if (distanceToNeighborFromCurrent < existingDistanceToNeighbor) {
+        distances[neighbor.getKey()] = distanceToNeighborFromCurrent
+
+        if (queue.hasValue(neighbor)) {
+          queue.changePriority(neighbor, distances[neighbor.getKey()])
+        }
+
+        previousVertices[neighbor.getKey()] = currentVertex
+      }
+
+      if (!queue.hasValue(neighbor)) {
+        queue.add(neighbor, distances[neighbor.getKey()])
+      }
+    })
 
     visitedVertices[currentVertexKey] = currentVertex
+
     if (targetKeys.includes(currentVertexKey)) break
   }
 
   return { distances, previousVertices }
-}
-
-function handleNeighborFactory<T>(
-  visitedVertices: { [key: string]: GraphVertex<T> },
-  options: IDijkstraOptions<T>,
-  graph: Graph<T>,
-  currentVertex: GraphVertex<T>,
-  distances: { [key: string]: number },
-  currentVertexKey: string,
-  queue: PriorityQueue<GraphVertex<T>>,
-  previousVertices: { [key: string]: GraphVertex<T> | null }
-): (item: GraphVertex<T>) => void {
-  return neighbor => {
-    if (visitedVertices[neighbor.getKey()]) return
-    if (options.canTraverse && !options.canTraverse(neighbor)) return
-
-    const edge = graph.findEdge(currentVertex, neighbor)!
-    const existingDistanceToNeighbor = distances[neighbor.getKey()]
-    const distanceToNeighborFromCurrent =
-      distances[currentVertexKey] + edge.weight
-
-    if (distanceToNeighborFromCurrent < existingDistanceToNeighbor) {
-      distances[neighbor.getKey()] = distanceToNeighborFromCurrent
-
-      if (queue.hasValue(neighbor)) {
-        queue.changePriority(neighbor, distances[neighbor.getKey()])
-      }
-
-      previousVertices[neighbor.getKey()] = currentVertex
-    }
-
-    if (!queue.hasValue(neighbor)) {
-      queue.add(neighbor, distances[neighbor.getKey()])
-    }
-  }
 }
