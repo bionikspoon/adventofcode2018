@@ -1,49 +1,19 @@
-const inspect = Symbol.for('nodejs.util.inspect.custom')
-export function doStuff(input: string) {
+import { keys, map } from 'ramda'
+import { OpName, ops } from './compute'
+import Sample from './Sample'
+
+export function findOpcodesWithNBehaviors(input: string, n: 3) {
   const [sample] = input.split('\n\n\n\n')
-  return sample.split('\n\n').map(Sample.from)[0]
+  const samples = sample.split('\n\n').map(Sample.from)
+  const behaviorsPerSample = findBehaviors(samples)
+  const samplesWithNBehaviors = behaviorsPerSample.filter(
+    behaviors => behaviors.length >= n
+  )
+  return samplesWithNBehaviors.length
 }
 
-const RE_MATCH_SAMPLE = /^Before:\s(?<before>\[.+\])\n(?<op>\d+)\s(?<a>\d+)\s(?<b>\d+)\s(?<c>\d+)\nAfter:\s\s(?<after>\[.+\])$/gmu
+const findBehaviors: (samples: Sample[]) => OpName[][] = map(sample =>
+  opNames.filter(opName => sample.testOp(opName))
+)
 
-class Sample {
-  public static from(sampleString: string) {
-    const groups = new RegExp(RE_MATCH_SAMPLE).exec(sampleString)!.groups!
-
-    const sample = new Sample(
-      JSON.parse(groups.before),
-      JSON.parse(groups.after),
-      [
-        parseInt(groups.op),
-        parseInt(groups.a),
-        parseInt(groups.b),
-        parseInt(groups.c),
-      ]
-    )
-
-    return sample
-  }
-
-  private readonly before: [number, number, number, number]
-  private readonly after: [number, number, number, number]
-  private readonly op: number
-  private readonly a: number
-  private readonly b: number
-  private readonly c: number
-  constructor(
-    before: [number, number, number, number],
-    after: [number, number, number, number],
-    [op, a, b, c]: [number, number, number, number]
-  ) {
-    this.before = before
-    this.after = after
-    this.op = op
-    this.a = a
-    this.b = b
-    this.c = c
-  }
-
-  public [inspect]() {
-    return `Sample { }`
-  }
-}
+const opNames: OpName[] = keys(ops)
