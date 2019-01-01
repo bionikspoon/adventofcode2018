@@ -40,9 +40,9 @@ export function runProgram(input: string) {
 
   return programLines.reduce(
     (
-      registry: [number, number, number, number],
+      registry: number[],
       [opCode, a, b, c]: [number, number, number, number]
-    ): [number, number, number, number] => {
+    ): number[] => {
       const opName = opCodeNameMap[opCode]
 
       return compute([opName, a, b, c], registry)
