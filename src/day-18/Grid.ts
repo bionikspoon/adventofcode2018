@@ -89,4 +89,7 @@ const groupByToken: (
 
 const mapLengths: <T>(
   groups: { [token: string]: T[] }
-) => { [token: string]: number } = map(length)
+) => { [token: string]: number } = map<
+  { [token: string]: any[] },
+  { [token: string]: number }
+>(length)
