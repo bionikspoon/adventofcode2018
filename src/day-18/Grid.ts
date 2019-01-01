@@ -1,4 +1,4 @@
-import { groupBy, pipe, values, map, length } from 'ramda'
+import { groupBy, length, map, pipe, values } from 'ramda'
 import { Graph, GraphEdge, GraphVertex } from '../utils/Graph'
 import { Acre, AcreValue } from './Acre'
 import { Token } from './shared'
