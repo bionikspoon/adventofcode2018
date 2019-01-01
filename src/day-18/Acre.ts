@@ -1,3 +1,4 @@
+import { filter, is } from 'ramda'
 import { Token } from './shared'
 
 export class Acre {
@@ -47,34 +48,29 @@ export abstract class AcreValue {
 class OpenAcre extends AcreValue {
   public readonly token: Token = Token.OPEN
   public willBecome(neighbors: AcreValue[]): AcreValue {
-    const neighborsWithTrees = neighbors.filter(
-      neighbor => neighbor instanceof TreeAcre
-    )
-    return neighborsWithTrees.length >= 3 ? new TreeAcre() : this
+    return selectInstances(TreeAcre, neighbors).length >= 3
+      ? new TreeAcre()
+      : this
   }
 }
 
 class TreeAcre extends AcreValue {
   public readonly token: Token = Token.TREE
   public willBecome(neighbors: AcreValue[]): AcreValue {
-    const neighborsWithLumberyards = neighbors.filter(
-      neighbor => neighbor instanceof LumberyardAcre
-    )
-    return neighborsWithLumberyards.length >= 3 ? new LumberyardAcre() : this
+    return selectInstances(LumberyardAcre, neighbors).length >= 3
+      ? new LumberyardAcre()
+      : this
   }
 }
 class LumberyardAcre extends AcreValue {
   public readonly token: Token = Token.LUMBERYARD
   public willBecome(neighbors: AcreValue[]): AcreValue {
-    const neighborsWithLumberyards = neighbors.filter(
-      neighbor => neighbor instanceof LumberyardAcre
-    )
-    const neighborsWithTrees = neighbors.filter(
-      neighbor => neighbor instanceof TreeAcre
-    )
-    return neighborsWithTrees.length >= 1 &&
-      neighborsWithLumberyards.length >= 1
+    return selectInstances(TreeAcre, neighbors).length >= 1 &&
+      selectInstances(LumberyardAcre, neighbors).length >= 1
       ? this
       : new OpenAcre()
   }
 }
+
+const selectInstances = <T>(ctor: any, items: T[]): T[] =>
+  filter(is(ctor), items)
