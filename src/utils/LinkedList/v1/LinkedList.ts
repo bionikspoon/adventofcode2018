@@ -1,5 +1,5 @@
-import util from 'util'
 import { reverse } from 'ramda'
+import util from 'util'
 
 export class LinkedList<T> {
   public static from<T>(xs: T[]) {
