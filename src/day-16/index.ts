@@ -1,6 +1,6 @@
 import { all, groupBy, keys, map } from 'ramda'
 import parseLines from '../utils/parseLines'
-import { OpName, ops, compute } from './compute'
+import { compute, OpName, ops } from './compute'
 import Sample from './Sample'
 
 export function findOpcodesWithNBehaviors(input: string, n: 3) {
