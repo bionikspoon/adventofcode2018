@@ -22,7 +22,7 @@ describe.each`
   inputFile       | initialRegistry       | expected                            | skip
   ${'case-1.txt'} | ${[0, 0, 0, 0, 0, 0]} | ${[7, 5, 6, 0, 0, 9]}               | ${false}
   ${'input.txt'}  | ${[0, 0, 0, 0, 0, 0]} | ${[1302, 1026, 1026, 1025, 1, 257]} | ${false}
-  ${'input.txt'}  | ${[1, 0, 0, 0, 0, 0]} | ${[1302, 1026, 1026, 1025, 1, 257]} | ${false}
+  ${'input.txt'}  | ${[1, 0, 0, 0, 0, 0]} | ${[0, 1, 1249999, 10551425, 0, 9]}  | ${true}
 `('given file $inputFile', ({ inputFile, initialRegistry, expected, skip }) => {
   const TEST = skip ? test.skip : test
   let input: string
