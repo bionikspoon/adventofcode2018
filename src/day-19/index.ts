@@ -24,10 +24,10 @@ export function instructionsToLog(input: string) {
   return logs.join('\n')
 }
 
-export function runInstructions(input: string) {
+export function runInstructions(input: string, registry: Registry) {
   const [ipRegister, instructions] = parseProgram(input)
 
-  return runProgram(ipRegister, instructions)
+  return runProgram(ipRegister, instructions, undefined, registry)
 }
 
 function parseProgram(input: string) {
@@ -47,9 +47,10 @@ type LogFn = (
 function runProgram(
   ipRegister: number,
   instructions: Instruction[],
-  logFn?: LogFn
+  logFn?: LogFn,
+  initialRegistry: Registry = [0, 0, 0, 0, 0, 0]
 ) {
-  let registry: Registry = [0, 0, 0, 0, 0, 0]
+  let registry: Registry = initialRegistry
   let ip = registry[ipRegister]
 
   let i = 0
