@@ -1,4 +1,4 @@
-import { compute, instructionsToLog } from '.'
+import { instructionsToLog, run, runInstructions } from '.'
 import { getInput } from '../utils/tests'
 
 describe.each`
@@ -19,17 +19,34 @@ describe.each`
 })
 
 describe.each`
+  inputFile       | expected                            | skip
+  ${'case-1.txt'} | ${[7, 5, 6, 0, 0, 9]}               | ${false}
+  ${'input.txt'}  | ${[1302, 1026, 1026, 1025, 1, 257]} | ${false}
+`('given file $inputFile', ({ inputFile, expected, skip }) => {
+  const TEST = skip ? test.skip : test
+  let input: string
+
+  beforeEach(async () => {
+    input = await getInput(__dirname, inputFile)
+  })
+
+  TEST('it returns the registry', () => {
+    expect(runInstructions(input)).toEqual(expected)
+  })
+})
+
+describe.each`
   ip   | registry              | instruction          | expected
   ${0} | ${[0, 0, 0, 0, 0, 0]} | ${['seti', 5, 0, 1]} | ${[1, [0, 5, 0, 0, 0, 0]]}
-  ${1} | ${[1, 5, 0, 0, 0, 0]} | ${['seti', 6, 0, 2]} | ${[2, [0, 5, 0, 0, 0, 0]]}
-  ${2} | ${[2, 5, 6, 0, 0, 0]} | ${['addi', 0, 1, 0]} | ${[4, [0, 5, 0, 0, 0, 0]]}
-  ${4} | ${[4, 5, 6, 0, 0, 0]} | ${['setr', 1, 0, 0]} | ${[6, [0, 5, 0, 0, 0, 0]]}
-  ${6} | ${[6, 5, 6, 0, 0, 0]} | ${['seti', 9, 0, 5]} | ${[7, [0, 5, 0, 0, 0, 0]]}
+  ${1} | ${[0, 5, 0, 0, 0, 0]} | ${['seti', 6, 0, 2]} | ${[2, [1, 5, 6, 0, 0, 0]]}
+  ${2} | ${[1, 5, 6, 0, 0, 0]} | ${['addi', 0, 1, 0]} | ${[4, [3, 5, 6, 0, 0, 0]]}
+  ${4} | ${[3, 5, 6, 0, 0, 0]} | ${['setr', 1, 0, 0]} | ${[6, [5, 5, 6, 0, 0, 0]]}
+  ${6} | ${[5, 5, 6, 0, 0, 0]} | ${['seti', 9, 0, 5]} | ${[7, [6, 5, 6, 0, 0, 9]]}
 `(
   'given registry $registry, ip $ip, and instruction $instruction',
   ({ ip, registry, instruction, expected }) => {
     test('it gets the programs next state', () => {
-      expect(compute(ip, instruction, registry)).toEqual(expected)
+      expect(run(0, ip, instruction, registry)).toEqual(expected)
     })
   }
 )
