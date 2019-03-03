@@ -2,7 +2,9 @@
 # More info at https://github.com/guard/guard#readme
 
 directories(%w[lib bin spec config] \
-  .select { |d| Dir.exist?(d) ? d : UI.warning("Directory #{d} does not exist") })
+  .select do |d|
+              Dir.exist?(d) ? d : UI.warning("Directory #{d} does not exist")
+            end)
 
 guard :rspec, cmd: 'bundle exec rspec' do
   require 'guard/rspec/dsl'
