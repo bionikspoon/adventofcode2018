@@ -1,5 +1,7 @@
 require 'bundler/setup'
 require 'adventofcode2018'
+require 'simplecov'
+SimpleCov.start
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
