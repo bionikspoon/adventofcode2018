@@ -1,3 +1,7 @@
+########
+# NODE #
+########
+
 # Logs
 logs
 *.log
@@ -59,3 +63,20 @@ typings/
 
 # next.js build output
 .next
+
+
+########
+# RUBY #
+########
+
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+
+# rspec failure tracking
+.rspec_status

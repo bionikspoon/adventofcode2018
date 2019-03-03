@@ -9,3 +9,7 @@
 
 [travis-master]: https://travis-ci.com/bionikspoon/adventofcode2018.svg?branch=master
 [travis-develop]: https://travis-ci.com/bionikspoon/adventofcode2018.svg?branch=develop
+
+## License
+
+The code is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
