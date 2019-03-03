@@ -9,8 +9,9 @@ group :development do
 end
 
 group :development, :test do
-  gem 'bundler', '~> 1.17'
-  gem 'rake', '~> 10.0'
-  gem 'rspec', '~> 3.0'
+  gem 'bundler'
+  gem 'pry'
+  gem 'rake'
+  gem 'rspec'
   gem 'simplecov', require: false
 end
