@@ -80,3 +80,9 @@ typings/
 
 # rspec failure tracking
 .rspec_status
+
+########
+# REPO #
+########
+
+.vscode/settings.json

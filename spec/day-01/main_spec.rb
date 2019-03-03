@@ -1,8 +1,9 @@
 require 'day-01/main'
 
-describe Sample do
-  it 'says hello' do
-    sample = Sample.new
-    expect(sample.hello).to be nil
+describe 'Day 01' do
+  it 'sum frequencies' do
+    File.open(File.join(File.dirname(__FILE__), './input.txt'), 'r') do |file|
+      expect(sum_frequencies(file)).to be 585
+    end
   end
 end
