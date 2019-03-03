@@ -1,9 +1,18 @@
 def sum_frequencies(file)
-  sum = 0
+  file.each_line.map(&:to_i).sum
+end
 
-  file.each_line do |line|
-    sum += line.to_i
+def find_duplicate(file)
+  running_total = 0
+  visited = { 0 => true }
+  changes = file.each_line.map(&:to_i)
+
+  changes.cycle.each do |change|
+    running_total += change
+    break if visited[running_total]
+
+    visited[running_total] = true
   end
 
-  sum
+  running_total
 end
