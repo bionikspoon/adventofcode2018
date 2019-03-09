@@ -5,3 +5,12 @@ AllCops:
 Metrics/BlockLength:
   ExcludedMethods:
     - describe
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+  Exclude:
+    - 'spec/**/*'
+Metrics/AbcSize:
+  Exclude:
+    - 'spec/**/*'
