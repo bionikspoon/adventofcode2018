@@ -9,6 +9,7 @@ group :development do
 end
 
 group :development, :test do
+  gem 'awesome_print'
   gem 'bundler'
   gem 'pry'
   gem 'rake'
