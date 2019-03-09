@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def sum_frequencies(file)
   file.each_line.map(&:to_i).sum
 end
