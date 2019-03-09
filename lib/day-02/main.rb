@@ -39,21 +39,32 @@ module Day02
   module Part2
     # @param left [String]
     # @param right [String]
-    def find_simularities(left, right)
-      left
-        .each_char
-        .zip(right.each_char)
-        .map { |(l, r)| l if l == r }
-        .compact
-        .join
+    def similar?(left, right)
+      strikes_remaining = 1
+      left.each_char
+          .zip(right.each_char)
+          .each do |(l, r)|
+            strikes_remaining -= 1 if l != r
+            break false if strikes_remaining.negative?
+          end && true
+    end
+
+    # @param left [String]
+    # @param right [String]
+    def find_similarities(left, right)
+      left.each_char
+          .zip(right.each_char)
+          .map { |(l, r)| l if l == r }
+          .compact
+          .join
     end
 
     # @param file [File]
     def find_common_chars(file)
       combinations = file.each_line.map(&:strip).combination(2)
+
       combinations.each do |(l, r)|
-        simularities = find_simularities(l, r)
-        break simularities if simularities.length == l.length - 1
+        break find_similarities(l, r) if similar?(l, r)
       end
     end
   end

@@ -2,6 +2,9 @@
 
 require 'day-02/main'
 
+describe Day02 do
+end
+
 describe Day02::Part1 do
   include Day02::Part1
 
@@ -50,19 +53,23 @@ end
 describe Day02::Part2 do
   include Day02::Part2
 
-  describe 'find_simularities' do
-    def self.test_find_simularities(input, expected)
-      context "given ids: #{input}" do
-        it "finds simularities '#{expected}'" do
-          expect(find_simularities(*input)).to eql expected
+  describe 'similarities' do
+    def self.test_similarities(input, similarities:, is_similar:)
+      context "given ids #{input}" do
+        it "finds similarities '#{similarities}'" do
+          expect(find_similarities(*input)).to eql similarities
+        end
+
+        it "#{is_similar ? 'IS' : 'is NOT'} similar" do
+          expect(similar?(*input)).to be is_similar
         end
       end
     end
 
-    test_find_simularities(%w[abcde fghij], '')
-    test_find_simularities(%w[abcde klmno], '')
-    test_find_simularities(%w[abcde axcye], 'ace')
-    test_find_simularities(%w[fghij fguij], 'fgij')
+    test_similarities(%w[abcde fghij], similarities: '', is_similar: false)
+    test_similarities(%w[abcde klmno], similarities: '', is_similar: false)
+    test_similarities(%w[abcde axcye], similarities: 'ace', is_similar: false)
+    test_similarities(%w[fghij fguij], similarities: 'fgij', is_similar: true)
   end
 
   describe '#find_common_chars' do
@@ -81,7 +88,6 @@ describe Day02::Part2 do
     test_common_chars('input.txt', 'pbykrmjmizwhxlqnasfgtycdv')
   end
 end
-
 def with_input(name)
   File.open(File.join(File.dirname(__FILE__), '__case__', name))
 end
