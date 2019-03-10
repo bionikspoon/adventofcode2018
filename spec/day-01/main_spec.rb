@@ -37,10 +37,10 @@ describe 'Day 01' do
     test_find_duplicate 'part-2-case-3.txt', 5
     test_find_duplicate 'part-2-case-4.txt', 14
   end
-end
 
-def with_input(name)
-  File.open(File.join(File.dirname(__FILE__), '__case__', name)) do |file|
-    yield file
+  def with_input(name)
+    File.open(File.join(File.dirname(__FILE__), '__case__', name)) do |file|
+      yield file
+    end
   end
 end
