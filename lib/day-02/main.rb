@@ -39,24 +39,27 @@ module Day02
   module Part2
     # @param left [String]
     # @param right [String]
+    def zip(left, right)
+      left.each_char.zip(right.each_char)
+    end
+
+    # @param left [String]
+    # @param right [String]
     def similar?(left, right)
       strikes_remaining = 1
-      left.each_char
-          .zip(right.each_char)
-          .each do |(l, r)|
-            strikes_remaining -= 1 if l != r
-            break false if strikes_remaining.negative?
-          end && true
+      zip(left, right).each do |(l, r)|
+        strikes_remaining -= 1 if l != r
+        break false if strikes_remaining.negative?
+      end && true
     end
 
     # @param left [String]
     # @param right [String]
     def find_similarities(left, right)
-      left.each_char
-          .zip(right.each_char)
-          .map { |(l, r)| l if l == r }
-          .compact
-          .join
+      zip(left, right)
+        .map { |(l, r)| l if l == r }
+        .compact
+        .join
     end
 
     # @param file [File]
